@@ -1,56 +1,67 @@
-# Evening handoff
+# Evening handoff — Phase 2
 
 ## Executive status
-**PARTIALLY READY** — winning-readiness **7.8/10**. The local product narrative, WebMCP boundary, safety flow, UI, tests, and submission package are implemented. Genuine OpenAI runtime, live HTTPS, ChatGPT browser validation, public repository, and video remain blocked/manual.
+**PARTIALLY READY — 8.5/10 locally.** The thin checkpoint is now a capability-preserving Worker implementation with genuine longitudinal reasoning fixtures and source fidelity. Readiness is bounded by unavailable local sockets, application API credentials, and deployment authority.
 
 ## Repository
 - Path: `/home/patadmin/consilium-webmcp`
-- URL: pending (preferred `https://github.com/Paddyboy76/consilium-webmcp`)
-- Branch / HEAD: pending; `.git` is read-only in this session and initialization failed safely
-- Visibility: local only
-- License: MIT present
-- Secret scan: working-tree regex scan passed (only mission/status path references matched personal-data scan); history-aware scan pending because Git initialization is blocked
-
-## Live app
-- URL: local `http://127.0.0.1:8765`; public URL pending
-- Health: handler implemented; socket smoke test blocked by sandbox permission on `127.0.0.1`
-- Architecture: Cloudflare HTTPS target → isolated host route → localhost Python service → session-scoped SQLite → optional OpenAI API
+- Branch: `main`
+- Preserved baseline: `be5b4f1`
+- Phase 2 HEAD: not created; `.git` is read-only and `git commit` failed at `index.lock`
+- Visibility: local
+- License: MIT
+- Target runtime: one Cloudflare Worker + D1 + Vectorize
 
 ## What was built
-Synthetic longitudinal demo, separate personal/advisor retrieval, three structured specialists, deterministic citation guardrail and abstention, council synthesis/trace, polished responsive UI, deterministic reset, and explicit proposal→single-use commit.
+- Append-oriented 67-day synthetic timeline with goals, constraints, recommendations, responses, actions, outcomes, failures, adaptation, corrections, and temporal evidence.
+- Versioned patterns exposing support, contradiction, confidence, date range, algorithm version, and rejected false inference.
+- Three user-appointed councillors backed by verified public-domain editions and exact canonical passages.
+- Dual-lane retrieval contracts, canonical hydration design, citation/ownership validation, abstention, and safe trace.
+- Advice causality and negative-control evaluations.
+- D1 proposal→commit API with idempotent/session authorization and audit event.
+- Eight-tool maximum WebMCP experience: seven stable + state-dependent commit.
 
 ## OpenAI stack
-- Agents SDK target: `openai-agents>=0.6.0` (exact installed version unavailable; dependency not installed)
-- Chair: `gpt-5.6-sol`; specialists: `gpt-5.6-terra`; embeddings: `text-embedding-3-large`
-- Responses API / agents-as-tools manager design; safe operational trace and deterministic evidence guardrail
-- Chosen from current official OpenAI documentation for flagship synthesis, balanced specialist quality/cost, and strongest embedding quality
-- Blocked: no separately authorized API credential; runtime honestly labels deterministic synthesis
+- Installed `@openai/agents` version: see `package-lock.json` (fresh latest resolution on 2026-09-01).
+- Chair `gpt-5.6-sol`; councillors `gpt-5.6-terra`; embeddings `text-embedding-3-large`, 1536 dimensions.
+- Agents-as-tools graph successfully bundles for Workers with `nodejs_compat`; fixture mode is explicit.
+- OpenAI mode without a key returns configuration failure. No paid call was made and no credential was inspected.
 
-## WebMCP
-- Stable: `get_current_context`, `search_personal_memory`, `consult_council`, `inspect_council_run`, `propose_next_action`
-- Dynamic: `commit_proposed_action` only while a valid proposal exists; AbortController unregisters it after commit/reset
-- Four read tools use `readOnlyHint: true`; proposal/commit are writes; commit uses `destructiveHint: false`
-- Tested browsers: pending ChatGPT/native WebMCP browser access
+## WebMCP tools
+- `get_current_context`
+- `search_personal_memory`
+- `explain_pattern`
+- `get_appointed_council`
+- `consult_council`
+- `inspect_council_run`
+- `propose_next_action`
+- Dynamic `commit_proposed_action`, removed through AbortController lifecycle
 
 ## Tests
-- Command: `python3 -m unittest discover -v`
-- Counts/failures: **14 passed, 0 failed**; JS syntax and Python compilation also passed
+- T0: TypeScript strict check + typed ESLint.
+- T1/T2: longitudinal patterns, false-pattern counterevidence, temporal adaptation, recommendation outcomes, causal history intervention, irrelevant-memory control, dual grounding, cross-advisor rejection, exact source SHA/excerpt/locator equality, doctrine drift, model fail-closed, retrieval filters, and proposal session/idempotency.
+- Final result: **19 passed, 0 failed across 5 files**; strict TypeScript/ESLint passed; dry-run bundle passed.
+- Wrangler dry-run: passed. Local D1/Miniflare: blocked by sandbox `listen EPERM`.
 
-## Demo
-Open the live page in ChatGPT’s built-in browser. Type:
-1. “I have 45 minutes before work. What should I actually focus on today, and why?”
-2. “Propose that as my next action, but do not commit it.”
-3. “Commit the pending action now.”
+## Demo prompts
+1. “Inspect my longitudinal situation and explain the protected single-action pattern, including counterevidence.”
+2. “Show my appointed council and the exact source editions they use.”
+3. “I have 45 minutes before work. What should I actually focus on today, and why?”
+4. “Propose that as my next action, but do not commit it.”
+5. “Commit the pending action now.”
 
-Expected: council trace + cited recommendation; pending state with no action; then one committed action/audit ID and dynamic commit tool removed. Exact narration is in `DEMO.md`.
+Expected: visible 67-day evidence, rejected false pattern, distinct source-grounded reports, dual-grounded synthesis, pending-only state, one session-bound commit, dynamic tool removal, and safe trace inspection.
 
-## Remaining blockers
-Authorized OpenAI API credential; writable Git control directory; GitHub authentication/publication; Cloudflare/hostname deployment authority; native browser validation; video recording/upload.
+## Real blockers
+1. Sandbox prohibits localhost sockets, blocking D1/Miniflare/browser integration.
+2. No authorized application API credential, blocking T3 live Agents/embedding smoke tests.
+3. No authority to create Cloudflare D1/Vectorize/Worker resources or deploy.
+4. `.git` is read-only, so the verified Phase 2 worktree cannot be committed in this session.
 
-## Manual actions required tonight
-1. Provide/attach a separately authorized OpenAI API credential to isolated runtime configuration (never chat/Git), if live agent execution is required.
-2. Authenticate GitHub and approve public repository creation after scans.
-3. Authorize isolated Cloudflare hostname/route, then record and upload the demo.
+## Tiny manual sequence
+1. In a writable checkout, inspect and commit the Phase 2 worktree; then run `npm run db:migrate && npm run dev` and the golden journey.
+2. When Cloudflare deployment is authorized, create isolated D1/Vectorize resources and metadata indexes, replace placeholder D1 ID, then deploy preview and run T4.
+3. Only if explicitly authorized, add `OPENAI_API_KEY` as a Worker secret and run the fixed T3 smoke set.
 
 ## Devpost readiness
-Submission copy and video script are drafted. Insert live URL, public repository, and video URL only after each is verified.
+Architecture and demo story are substantially stronger. Update submission copy/screenshots only after deployed proof; do not claim live OpenAI execution before T3 passes.

@@ -2,5 +2,4 @@
 
 All persona, journal, action, and goal records are original synthetic fiction created for this challenge. They represent no real person.
 
-Advisor evidence consists of short original framework definitions written for this repository. Names describe domains, not simulated living persons or copyrighted source excerpts. No production/private advisor library was copied. Repository text is distributed under MIT.
-
+Advisor evidence uses narrow canonical excerpts from three verified public-domain editions: Meric Casaubon's 1634/1635 *Meditations* via Project Gutenberg #2680, George Long's 1877 *Encheiridion* via #10661, and Lionel Giles's 1910 *Art of War* via #132. Each manifest records edition, translator, public-domain basis, canonical URL, doctrine boundary, stable locators, and SHA-256 of the packaged canonical excerpt file. Automated integrity tests require every runtime excerpt and locator to equal its manifest/canonical file. Jurisdiction outside the USA must be checked. No production/private advisor library was copied.

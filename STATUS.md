@@ -1,40 +1,41 @@
-# Status
+# Phase 2 status
 
 Updated: 2026-09-01 UTC
 
 ## Current phase
-P0 local implementation and verification; external activation remains.
+Worker architecture, longitudinal domain, source-fidelity, retrieval, and council foundation implemented. Local D1/Miniflare integration and external activation remain blocked.
 
-## Completed
-- Read the mission completely and established a fresh isolated workspace.
-- Verified official deadline and current WebMCP registration/lifecycle API.
-- Built synthetic longitudinal persona, separate memory/advisor evidence, structured specialist reports, citation validation/abstention, council decision and safe trace.
-- Built responsive primary UI and six WebMCP tools (five stable + dynamic one-use commit).
-- Built session-scoped deterministic reset and proposal→commit state machine.
-- Added security/provenance/architecture/demo/submission documentation and MIT license.
+## Preserved checkpoint
+- Baseline: `be5b4f10fcfa25286cf8e27f4649f6da701291af` on `main`.
+- Python prototype remains intact under `app/` and `tests/`; it has not been weakened or removed.
 
-## Environment audit
-- User `patadmin`; host `hallermann-fortress-01`; Debian 13.6; UTC.
-- Git 2.47.3; GitHub CLI 2.96.0 (not authenticated); Codex CLI 0.147.0.
-- Python 3.13.5; Node 24.14.1; npm 11.17.0; Docker 29.6.2; systemd 257.
-- `nginx` CLI unavailable. Wrangler check did not produce a version before command timeout.
-- The combined audit command timed out during the Wrangler check before the reference-path checks completed. Brain2 and Hallermann source inspection therefore remain unverified; no production/private content was read.
-- Initial workspace had no Git repository or visible source files.
+## Completed evidence
+- Four ADRs: runtime/storage, append-oriented history, dual-lane RAG/citations, Agents SDK compatibility.
+- One Worker serves API/assets with D1, Vectorize, and explicit fixture/OpenAI adapter boundary.
+- D1 migration models users/sessions, projects/goals/commitments, immutable timeline events, recommendation responses/outcomes, versioned patterns and counterevidence, source packs/chunks, appointments, consultations/reports, proposals/commits, vector metadata, and audit events.
+- Synthetic 67-day history includes supported overload, rejected false morning pattern, successful adaptation, rejected advice, accepted failure, accepted success, goal changes, constraints, and recency shift.
+- Counterfactual evaluation proves relevant history changes advice; negative control proves irrelevant memory does not.
+- Three public-domain source packs with exact edition/translator metadata, canonical URLs, doctrine/anti-drift profiles, stable locators, and SHA-256 verified excerpt files.
+- Personal and advisor Vectorize query contracts filter before top-k; advisor lane filters advisor + appointed pack version.
+- Every accepted personalized claim is dual-grounded. Invalid/polluted citations are excluded and force chair abstention.
+- Agents SDK graph constructs three distinct `gpt-5.6-terra` specialists as tools for a `gpt-5.6-sol` chair; Wrangler dry-run bundles it successfully without a paid call.
+- WebMCP exposes seven stable capabilities plus dynamic single-use commit, including pattern explanation and appointed-source provenance.
 
-## Git
-Branch/HEAD/remote: not initialized. The pre-created `.git` control path is read-only in this environment, so `git init -b main` failed safely.
+## Test triggers and results
+- T0 triggered by Worker/config/dependency changes: `npm run check` passed after final affected changes.
+- T1/T2 triggered by timeline, source, retrieval, validation, and mutation changes: **19 meaningful Vitest cases passed across 5 files**.
+- Worker dry-run passed with Wrangler 4.127.1; bundle sees D1, Vectorize, assets, and config.
+- Python baseline tests were not rerun because the Python implementation was unchanged.
+- T3 blocked: no authorized application API credential.
+- T4 blocked: no authorized deployment/native WebMCP browser preview.
 
-## Tests
-`python3 -m unittest discover -v`: **14 passed, 0 failed**. `node --check web/app.js` and Python compilation passed.
+## Blockers / untested boundary
+- Wrangler local D1 migration/Miniflare attempts fail with sandbox `listen EPERM 127.0.0.1`. No bypass attempted. D1 API integration and browser journey therefore lack runtime proof here.
+- `wrangler types` generated the binding header but could not complete runtime types because the same socket restriction applies; the project uses published Workers types and strict T0 checks meanwhile.
+- Git writes are blocked: `.git/index.lock` cannot be created because `.git` is read-only. Phase 2 work remains an uncommitted worktree on preserved baseline `be5b4f1`.
+- No authorized `OPENAI_API_KEY`; live Responses/Agents and embeddings fail closed by design.
+- No deployment, DNS, Cloudflare resource creation, or publication attempted.
+- Vectorize index metadata-index creation and real D1/Vectorize hydration require authorized Cloudflare resources.
 
-## Deployment
-Not deployed. Isolated systemd unit prepared; live hostname/Cloudflare route not mutated. Local socket smoke test was blocked by sandbox `PermissionError` even on `127.0.0.1`; no bypass attempted.
-
-## Blockers
-- No separately authorized OpenAI API credential is available; per mission constraints, no credential was created, inspected, or borrowed. Live Agents SDK/model execution cannot be tested.
-- GitHub CLI is unauthenticated, so remote creation/publication is blocked.
-- Workspace `.git` is read-only, so fresh local history/commits are blocked in this session.
-- External deployment changes require authorized Cloudflare/host configuration and a verified hostname.
-
-## Next highest priority
-Run the HTTP smoke test in an authorized local shell; initialize fresh Git where `.git` is writable; then implement/activate the live Agents SDK adapter only if an authorized API credential becomes available.
+## Next safe action
+Commit the verified Phase 2 work in an environment where `.git` is writable. External next step is an authorized Wrangler/Miniflare environment or deployment preview, then T4; T3 only after an explicitly supplied Worker secret.

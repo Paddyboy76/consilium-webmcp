@@ -13,7 +13,7 @@ Consilium lets a human’s chosen browser agent collaborate with a persistent, e
 General assistants are powerful but episodic. They repeatedly reconstruct the person, lose decision history, and mix advice with action. We wanted persistent intelligence that belongs to the human, not to one chat session.
 
 ## What it does
-Consilium keeps goals, reflections, decisions, and outcomes as personal memory. A Council Chair selects relevant specialist agents, each retrieves separate advisor evidence and bounded personal context, and each returns a citation-required structured report. Unknown citations fail validation; insufficient support causes abstention. The Chair surfaces consensus, disagreement, uncertainty, and a next action.
+Consilium keeps an append-oriented longitudinal record of goals, commitments, advice, responses, actions, failures, adaptations, and outcomes. It derives versioned patterns with supporting and contradictory events. A Council Chair invokes only the user-appointed specialists; each retrieves its own verified public-domain source pack plus causal personal context and returns a citation-required structured report. Unknown or cross-councillor citations fail validation; insufficient support causes abstention.
 
 ## Why WebMCP
 WebMCP is the architectural boundary between an external browser agent and the human’s system. It exposes exactly the useful capabilities—not a brittle UI and not a broad backend API. Tool availability changes with application state: proposal creation dynamically registers a commit capability, and successful commit removes it. Human and agent see the same live trace and state.
@@ -22,10 +22,10 @@ WebMCP is the architectural boundary between an external browser agent and the h
 The external agent can understand current priorities, search bounded memory, consult the internal council, inspect evidence, and draft a proposal. It cannot silently convert advice into a persistent plan. The human explicitly authorizes the one-use commit.
 
 ## Implementation
-Six tools use the current `document.modelContext.registerTool` API, JSON schemas, read-only hints, and abort-signal registration lifecycle. A localhost-bound Python service supplies session-isolated SQLite state. Personal and advisor retrieval paths remain distinct. The UI reconciles every important tool result into visible state.
+Eight focused capabilities use the current `document.modelContext.registerTool` API, JSON schemas, read-only hints, and abort-signal registration lifecycle. One Cloudflare Worker serves the UI/API; D1 is canonical and Vectorize is derived. Personal and advisor retrieval paths use distinct pre-query metadata filters. The UI exposes pattern support, counterevidence, source editions, and every important tool result.
 
 ## OpenAI technology
-The deployment design uses OpenAI Agents SDK’s agents-as-tools manager pattern, `gpt-5.6-sol` for council synthesis, `gpt-5.6-terra` for specialists, Responses API, and `text-embedding-3-large`. Deterministic demo mode proves the complete safety flow without pretending live model execution when no separately authorized API credential is present.
+The implementation constructs OpenAI Agents SDK’s agents-as-tools manager pattern with `gpt-5.6-sol` for council synthesis, distinct `gpt-5.6-terra` specialists, Responses API, and `text-embedding-3-large` at 1536 dimensions. It bundles under Wrangler. Deterministic fixture mode proves advice causality and the complete safety flow without pretending live model execution when no separately authorized API credential is present.
 
 ## Challenges and accomplishments
 The hardest problem was making agentic collaboration inspectable without exposing chain-of-thought, and making writes useful without weakening human control. We built safe operational tracing, evidence-ID validation, an injection fixture, deterministic reset, and a dynamic proposal→commit capability.
@@ -45,4 +45,3 @@ WebMCP, OpenAI Agents SDK, Responses API, GPT-5.6 Sol, GPT-5.6 Terra, text-embed
 - Video: **pending recording/upload**
 
 Testing: follow the 60-second judge test in `README.md`; full script in `DEMO.md`.
-

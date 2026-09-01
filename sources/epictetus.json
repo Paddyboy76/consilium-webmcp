@@ -1,0 +1,6 @@
+{
+  "id":"pack-epictetus-pg10661-v1","advisor_id":"epictetus","version":"pg10661-v1","author":"Epictetus","title":"The Encheiridion, or Manual","translator":"George Long","edition":"Project Gutenberg eBook #10661; selection from the 1877 translation","publication_year":1877,"public_domain_basis":"George Long died in 1879; Project Gutenberg distributes eBook #10661 as public-domain material in the USA.","canonical_url":"https://www.gutenberg.org/ebooks/10661","source_sha256":"2acf138b4695834ffbb0b2f70d66f08ee9202f23d979cfc0914e29177029a47e","doctrine_profile":"Distinguish what depends on one's own judgment and action from what does not; align effort with agency.","anti_drift_boundaries":"Do not recommend passivity, suppress emotion, deny structural constraints, or claim outcomes are controllable.","chunks":[
+    {"id":"epictetus-ench-01a","locator":"Encheiridion I","text":"Of things some are in our power, and others are not. In our power are opinion, movement towards a thing, desire, aversion, turning from a thing; and in a word, whatever are our acts."},
+    {"id":"epictetus-ench-01b","locator":"Encheiridion I","text":"Not in our power are the body, property, reputation, offices, and in a word, whatever are not our own acts."}
+  ]
+}

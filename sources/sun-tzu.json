@@ -1,0 +1,6 @@
+{
+  "id":"pack-suntzu-pg132-v1","advisor_id":"sun-tzu","version":"pg132-2024-10-29-v1","author":"Sunzi","title":"The Art of War","translator":"Lionel Giles","edition":"London: Luzac & Co., 1910; Project Gutenberg eBook #132","publication_year":1910,"public_domain_basis":"Lionel Giles died in 1958; the 1910 edition and Project Gutenberg eBook #132 are public domain in the USA. Jurisdiction must be checked before redistribution.","canonical_url":"https://www.gutenberg.org/ebooks/132","source_sha256":"701ea46fcd771d30d3fac26552187922e975580b59c142fa542bf0fb7d86e9e1","doctrine_profile":"Study conditions, choose advantageous ground, avoid waste, and adapt plans to evidence.","anti_drift_boundaries":"Apply strategic principles metaphorically and non-violently; never militarize relationships, manipulate people, or fabricate competitive threats.","chunks":[
+    {"id":"suntzu-1-18","locator":"Chapter I, Laying Plans, section 18","text":"All warfare is based on deception."},
+    {"id":"suntzu-3-2","locator":"Chapter III, Attack by Stratagem, section 2","text":"Hence to fight and conquer in all your battles is not supreme excellence; supreme excellence consists in breaking the enemy’s resistance without fighting."}
+  ]
+}

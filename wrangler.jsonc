@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "consilium-webmcp",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "./web", "binding": "ASSETS", "run_worker_first": ["/api/*"] },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "consilium-webmcp-local",
+    "database_id": "00000000-0000-0000-0000-000000000000",
+    "migrations_dir": "migrations"
+  }],
+  "vectorize": [{ "binding": "VECTOR_INDEX", "index_name": "consilium-evidence-v1" }],
+  "vars": { "APP_MODE": "fixture", "MODEL_CONFIG_VERSION": "council-v1" },
+  "observability": { "enabled": true, "head_sampling_rate": 1 }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "consilium-webmcp-worker",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit && eslint .",
+    "test": "vitest run",
+    "dev": "wrangler dev --local",
+    "db:migrate": "wrangler d1 migrations apply consilium-webmcp-local --local",
+    "deploy:check": "wrangler deploy --dry-run"
+  },
+  "dependencies": {
+    "@openai/agents": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "latest",
+    "@cloudflare/workers-types": "latest",
+    "@eslint/js": "latest",
+    "eslint": "latest",
+    "typescript": "latest",
+    "typescript-eslint": "latest",
+    "vitest": "latest",
+    "wrangler": "latest"
+  }
+}
