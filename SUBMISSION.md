@@ -34,7 +34,7 @@ The hardest problem was making agentic collaboration inspectable without exposin
 WebMCP becomes most valuable when capabilities encode product state and trust—not when it merely mirrors CRUD. Persistent memory and external agents complement each other when provenance and mutation authority are explicit.
 
 ## What’s next
-Activate and benchmark the live Agents SDK adapter, deploy behind isolated Cloudflare HTTPS routing, validate in ChatGPT’s current built-in browser, and add private-memory pluggability without changing the public demo boundary.
+Activate and benchmark the separately gated live Agents SDK adapter, extend browser proof to the mutation lifecycle if needed, and add private-memory pluggability without changing the public demo boundary.
 
 ## Built with
 WebMCP, OpenAI Agents SDK, Responses API, GPT-5.6 Sol, GPT-5.6 Terra, Cloudflare Workers AI, Vectorize, D1, TypeScript, HTML/CSS/JavaScript.
@@ -48,4 +48,4 @@ Testing: follow the 60-second judge test in `README.md`; full script in `DEMO.md
 
 ## Evidence status
 
-The Hetzner checkout has passed in-process static and behavioral checks. The deterministic local HTTP journey is packaged for the supervising shell but is not presented as completed browser or deployment proof until run outside the socket-restricted sandbox. Live Workers AI/Vectorize, deployed WebMCP, and OpenAI Agents application execution remain separate external evidence; the fixture UI labels itself and no paid OpenAI call was made.
+The Hetzner checkout passed in-process and local HTTP checks. The isolated Cloudflare Worker passed server-live D1/Workers AI/Vectorize acceptance, and supervisor Browser/WebMCP proof passed bounded memory search, canonical dual-grounded council consultation, and visible honest UI/trace/guardrail state. Proposal/commit/replay/reset are server-live corroborated rather than browser-proven. OpenAI Agents application execution remains untested and unclaimed; no paid OpenAI application call was made.
