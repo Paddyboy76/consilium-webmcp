@@ -1,0 +1,12 @@
+{
+  "manifest_version":"pipeline-manifest-v1",
+  "d1_schema_version":"0002_hardening",
+  "prompts":{"specialist":"specialist-v2-untrusted-delimited","chair":"chair-v2-validated-reports-only"},
+  "models":{"chair":{"id":"gpt-5.6-sol","reasoning":"default"},"specialist":{"id":"gpt-5.6-terra","reasoning":"default"}},
+  "embedding":{"provider":"cloudflare-workers-ai","model":"@cf/baai/bge-base-en-v1.5","dimensions":768,"metric":"cosine"},
+  "source_packs":{"marcus-aurelius":"pg2680-2026-07-13-v1:c8aa53365343d26f5ecc9abf2e4221efffddfc49e841152a505761b38f9a3482","epictetus":"pg10661-v1:2acf138b4695834ffbb0b2f70d66f08ee9202f23d979cfc0914e29177029a47e","sun-tzu":"pg132-2024-10-29-v1:701ea46fcd771d30d3fac26552187922e975580b59c142fa542bf0fb7d86e9e1"},
+  "chunker_version":"section-aware-excerpts-v1",
+  "retrieval":{"personal_top_k":8,"advisor_top_k":6,"personal_score_floor":0.62,"advisor_score_floors":{"marcus-aurelius":0.64,"epictetus":0.66,"sun-tzu":0.63},"max_filter_bytes":1800},
+  "validator_version":"dual-ground-semantic-support-v2",
+  "fixture_version":"longitudinal-seed-v2"
+}

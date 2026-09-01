@@ -1,0 +1,10 @@
+{
+  "normalization_version":"gutenberg-excerpt-normalization-v1",
+  "normalization":"From each acquired excerpt record, remove acquisition metadata, Gutenberg boilerplate/commentary, section-number prefixes, parenthetical Greek transliterations, and parenthetical glosses; preserve Unicode punctuation and passage wording otherwise. Canonical chunks are exact substrings of the normalized file.",
+  "packs":[
+    {"advisor_id":"marcus-aurelius","raw_file":"raw/marcus-aurelius-pg2680-acquired.txt","raw_sha256":"b1d743154feb606f7f061da48a53d37ca03df7f0e38e27c18c57f7e2a3067b16","normalized_file":"canonical/marcus-aurelius-pg2680-excerpts.txt","normalized_sha256":"c8aa53365343d26f5ecc9abf2e4221efffddfc49e841152a505761b38f9a3482","us_public_domain_reason":"Meric Casaubon translation first published 1634; translator died 1671. Project Gutenberg #2680 marks the work public domain in the USA."},
+    {"advisor_id":"epictetus","raw_file":"raw/epictetus-pg10661-acquired.txt","raw_sha256":"d7cc3d2465240ff8f7348556b32ac247b9ed361fa70d801349fed6dbecde1fc6","normalized_file":"canonical/epictetus-pg10661-excerpts.txt","normalized_sha256":"2acf138b4695834ffbb0b2f70d66f08ee9202f23d979cfc0914e29177029a47e","us_public_domain_reason":"George Long translation published 1877; translator died 1879. Project Gutenberg #10661 distributes it as public-domain material in the USA."},
+    {"advisor_id":"sun-tzu","raw_file":"raw/sun-tzu-pg132-acquired.txt","raw_sha256":"917b37d6aee905cd7d1c07bd0a1e430b7276e57f47f8fa5790409ba28d4ac045","normalized_file":"canonical/sun-tzu-pg132-excerpts.txt","normalized_sha256":"701ea46fcd771d30d3fac26552187922e975580b59c142fa542bf0fb7d86e9e1","us_public_domain_reason":"Lionel Giles translation published in the USA no later than 1910 and is public domain in the USA; Project Gutenberg #132 distributes the edition."}
+  ],
+  "corpus_exclusions":["Project Gutenberg license/boilerplate","Project Gutenberg trademark text","editorial commentary","navigation","automatically generated summaries"]
+}

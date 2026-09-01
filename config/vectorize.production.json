@@ -1,0 +1,18 @@
+{
+  "schema_version": "vectorize-schema-v2",
+  "index_name": "consilium-evidence-bge768-v2",
+  "model_id": "@cf/baai/bge-base-en-v1.5",
+  "dimensions": 768,
+  "metric": "cosine",
+  "metadata_indexes": [
+    {"property":"corpus_kind","type":"string"},
+    {"property":"user_id","type":"string"},
+    {"property":"advisor_id","type":"string"},
+    {"property":"pack_version","type":"string"},
+    {"property":"pipeline_version","type":"string"}
+  ],
+  "filter_compact_json_max_bytes": 1800,
+  "platform_filter_limit_bytes_verified": 2048,
+  "ingestion_order": ["create_index","create_metadata_indexes","wait_for_mutations","upsert_vectors"],
+  "rebuild_policy": "Create a new versioned index, rebuild from canonical D1, validate, switch binding, then retire old index."
+}

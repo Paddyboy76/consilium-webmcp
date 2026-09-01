@@ -1,6 +1,5 @@
-const session = 'demo';
 const api = async (path, options={}) => {
-  const response = await fetch(path, {headers:{'Content-Type':'application/json','X-Consilium-Session':session}, ...options});
+  const response = await fetch(path, {credentials:'same-origin',headers:{'Content-Type':'application/json'}, ...options});
   const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Request failed'); return data;
 };
 const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

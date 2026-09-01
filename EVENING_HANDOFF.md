@@ -1,67 +1,57 @@
-# Evening handoff — Phase 2
+# Evening handoff — Phase 2 hardening
 
 ## Executive status
-**PARTIALLY READY — 8.5/10 locally.** The thin checkpoint is now a capability-preserving Worker implementation with genuine longitudinal reasoning fixtures and source fidelity. Readiness is bounded by unavailable local sockets, application API credentials, and deployment authority.
+**PARTIALLY READY — locally hardened.** All requested locally provable security, persistence, retrieval, provenance, and operating-limit changes are implemented without cutting any P0 capability. External Workers AI/Vectorize, workerd startup, browser, and OpenAI reasoning proof remain intentionally unclaimed.
 
 ## Repository
 - Path: `/home/patadmin/consilium-webmcp`
 - Branch: `main`
-- Preserved baseline: `be5b4f1`
-- Phase 2 HEAD: not created; `.git` is read-only and `git commit` failed at `index.lock`
-- Visibility: local
-- License: MIT
-- Target runtime: one Cloudflare Worker + D1 + Vectorize
+- Hardening base: `2dfb0b21b4908ad316c5549959ead9aa66824440`
+- Hardening commit: pending supervising shell if sandbox Git remains read-only
+- Deployment/publication: not attempted
 
-## What was built
-- Append-oriented 67-day synthetic timeline with goals, constraints, recommendations, responses, actions, outcomes, failures, adaptation, corrections, and temporal evidence.
-- Versioned patterns exposing support, contradiction, confidence, date range, algorithm version, and rejected false inference.
-- Three user-appointed councillors backed by verified public-domain editions and exact canonical passages.
-- Dual-lane retrieval contracts, canonical hydration design, citation/ownership validation, abstention, and safe trace.
-- Advice causality and negative-control evaluations.
-- D1 proposal→commit API with idempotent/session authorization and audit event.
-- Eight-tool maximum WebMCP experience: seven stable + state-dependent commit.
+## Production pipeline
+- Runtime: one Cloudflare Worker, D1 canonical store, one Vectorize index.
+- Embeddings: Workers AI `@cf/baai/bge-base-en-v1.5`, 768 dimensions, cosine.
+- Index: `consilium-evidence-bge768-v2`.
+- Filter indexes created before insertion: `corpus_kind`, `user_id`, `advisor_id`, `pack_version`, `pipeline_version`.
+- Reasoning remains separate: `gpt-5.6-sol` chair and three distinct `gpt-5.6-terra` councillors through Agents SDK. No paid call made.
+- Pipeline hash: `1f5efdc1c1ef895b221f8dba3ab9c6b64139eb4265eb33a154ba560aa761109f`.
 
-## OpenAI stack
-- Installed `@openai/agents` version: see `package-lock.json` (fresh latest resolution on 2026-09-01).
-- Chair `gpt-5.6-sol`; councillors `gpt-5.6-terra`; embeddings `text-embedding-3-large`, 1536 dimensions.
-- Agents-as-tools graph successfully bundles for Workers with `nodejs_compat`; fixture mode is explicit.
-- OpenAI mode without a key returns configuration failure. No paid call was made and no credential was inspected.
+## Security hardening
+- Client-controlled `X-Consilium-Session` is no longer authoritative or emitted by the UI.
+- Server issues signed/expiring/versioned strict secure cookies. Key rotation accepts one explicit previous version until natural expiry and issues only the current version.
+- Consultation, trace, proposal, commit, reset, action, and audit ownership use the validated server session.
+- Atomic conditional D1 batch plus unique indexes permits exactly one action and commit audit per proposal.
+- Both retrieval lanes are untrusted and structurally delimited. The chair receives only validated structured reports.
+- Claim support includes semantic mapping/score calibration, not ID membership alone.
 
-## WebMCP tools
-- `get_current_context`
-- `search_personal_memory`
-- `explain_pattern`
-- `get_appointed_council`
-- `consult_council`
-- `inspect_council_run`
-- `propose_next_action`
-- Dynamic `commit_proposed_action`, removed through AbortController lifecycle
+## Tests and command evidence
+- T0: strict TypeScript and typed ESLint.
+- T1: signed-cookie attacks/replay/rotation, schema migration, racing commit, cross-session commit, filter bounds, cancellation/limits, manifest hash.
+- T2: preserved longitudinal causality/negative control, per-pack positive/negative retrieval calibration, unrelated valid-ID rejection, two injection red teams, source raw/normalized integrity.
+- Latest complete suite before final RC: **9 files, 41 passed, 0 failed**.
+- Final release-candidate checks: strict T0 passed; **9 files, 41 tests passed, 0 failed**; Wrangler dry-run passed. The combined command then stopped at `git diff --check` solely for a trailing blank line in `STATUS.md`; that formatting defect was removed and the diff/scan tail was rerun without repeating unchanged suites.
+- Final Wrangler dry-run: 3 assets; 3898.56 KiB raw / 685.97 KiB gzip; bindings include D1, one BGE768 Vectorize index, Workers AI, assets, pipeline version, consultation limit, and session key version.
+- Configured CPU/subrequests: 30,000 ms / 40. Expected golden journey: 18 subrequests. Workerd startup unmeasured (`listen EPERM`).
 
-## Tests
-- T0: TypeScript strict check + typed ESLint.
-- T1/T2: longitudinal patterns, false-pattern counterevidence, temporal adaptation, recommendation outcomes, causal history intervention, irrelevant-memory control, dual grounding, cross-advisor rejection, exact source SHA/excerpt/locator equality, doctrine drift, model fail-closed, retrieval filters, and proposal session/idempotency.
-- Final result: **19 passed, 0 failed across 5 files**; strict TypeScript/ESLint passed; dry-run bundle passed.
-- Wrangler dry-run: passed. Local D1/Miniflare: blocked by sandbox `listen EPERM`.
+## Completion commands
+- `npm run check`
+- `npm test`
+- `XDG_CONFIG_HOME=/tmp/consilium-xdg npm run deploy:check`
+- `git diff --check`
+- Worktree/history secret and forbidden-path filename scans described in final status evidence.
 
-## Demo prompts
-1. “Inspect my longitudinal situation and explain the protected single-action pattern, including counterevidence.”
-2. “Show my appointed council and the exact source editions they use.”
-3. “I have 45 minutes before work. What should I actually focus on today, and why?”
-4. “Propose that as my next action, but do not commit it.”
-5. “Commit the pending action now.”
+## Remaining blockers
+1. Sandbox prohibits localhost sockets, blocking Miniflare/D1/browser integration and startup measurement.
+2. No authorized Cloudflare resource creation/deployment, so real Workers AI/Vectorize retrieval and T4 are untested.
+3. No authorized OpenAI reasoning key, so T3 is untested.
+4. Runtime needs a new `SESSION_SIGNING_KEY` Worker secret (and only during rotation, optional previous secret/version). No secret exists in the repository.
 
-Expected: visible 67-day evidence, rejected false pattern, distinct source-grounded reports, dual-grounded synthesis, pending-only state, one session-bound commit, dynamic tool removal, and safe trace inspection.
+## Minimal authorized next steps
+1. Review/commit the hardening worktree from base `2dfb0b2`.
+2. Follow `docs/VECTORIZE_RUNBOOK.md`, apply D1 migrations, and add `SESSION_SIGNING_KEY` with `wrangler secret put` in an isolated preview.
+3. Run T4 once for that deployed SHA. Run the fixed multi-sample T3 reasoning evaluation only if separately authorized.
 
-## Real blockers
-1. Sandbox prohibits localhost sockets, blocking D1/Miniflare/browser integration.
-2. No authorized application API credential, blocking T3 live Agents/embedding smoke tests.
-3. No authority to create Cloudflare D1/Vectorize/Worker resources or deploy.
-4. `.git` is read-only, so the verified Phase 2 worktree cannot be committed in this session.
-
-## Tiny manual sequence
-1. In a writable checkout, inspect and commit the Phase 2 worktree; then run `npm run db:migrate && npm run dev` and the golden journey.
-2. When Cloudflare deployment is authorized, create isolated D1/Vectorize resources and metadata indexes, replace placeholder D1 ID, then deploy preview and run T4.
-3. Only if explicitly authorized, add `OPENAI_API_KEY` as a Worker secret and run the fixed T3 smoke set.
-
-## Devpost readiness
-Architecture and demo story are substantially stronger. Update submission copy/screenshots only after deployed proof; do not claim live OpenAI execution before T3 passes.
+## Cut policy
+Never cut longitudinal event/outcome memory, memory-shaped advice, causal proof, dual grounding, appointed source fidelity, semantic/canonical citation rejection, session ownership, atomic commit, injection resistance, or the WebMCP golden path. Cut extra councillors, cosmetics, optional entailment sophistication, and deployment automation first.

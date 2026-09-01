@@ -11,7 +11,9 @@
     "database_id": "00000000-0000-0000-0000-000000000000",
     "migrations_dir": "migrations"
   }],
-  "vectorize": [{ "binding": "VECTOR_INDEX", "index_name": "consilium-evidence-v1" }],
-  "vars": { "APP_MODE": "fixture", "MODEL_CONFIG_VERSION": "council-v1" },
+  "vectorize": [{ "binding": "VECTOR_INDEX", "index_name": "consilium-evidence-bge768-v2" }],
+  "ai": { "binding": "AI" },
+  "vars": { "APP_MODE": "fixture", "MODEL_CONFIG_VERSION": "council-v1", "PIPELINE_VERSION": "1f5efdc1c1ef895b221f8dba3ab9c6b64139eb4265eb33a154ba560aa761109f", "CONSULTATION_LIMIT_PER_HOUR": "6", "SESSION_KEY_VERSION": "k1" },
+  "limits": { "cpu_ms": 30000, "subrequests": 40 },
   "observability": { "enabled": true, "head_sampling_rate": 1 }
 }

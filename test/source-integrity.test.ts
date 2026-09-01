@@ -15,4 +15,5 @@ describe('canonical source ingestion',()=>{
     const source=readFileSync(sourcePath,'utf8');expect(createHash('sha256').update(source).digest('hex')).toBe(manifest.source_sha256);
     for(const chunk of manifest.chunks){expect(source.includes(chunk.text)).toBe(true);const runtime=SOURCE_CHUNKS.find(item=>item.id===chunk.id);expect(runtime?.text).toBe(chunk.text);expect(runtime?.locator).toBe(chunk.locator)}
   });
+  it('verifies raw acquisition and normalized canonical hashes separately',()=>{const provenance=JSON.parse(readFileSync('sources/provenance.json','utf8')) as {packs:{raw_file:string;raw_sha256:string;normalized_file:string;normalized_sha256:string;us_public_domain_reason:string}[]};for(const pack of provenance.packs){const hash=(path:string)=>createHash('sha256').update(readFileSync(`sources/${path}`)).digest('hex');expect(hash(pack.raw_file)).toBe(pack.raw_sha256);expect(hash(pack.normalized_file)).toBe(pack.normalized_sha256);expect(pack.us_public_domain_reason.length).toBeGreaterThan(40)}});
 });

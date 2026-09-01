@@ -11,6 +11,12 @@ Tests protect material behavior; there is no target count.
 | Decorative citations | Dual grounding and canonical equality | citation validator tests | retrieval/validator/source | T1/T2 free | pending |
 | Councillor drift | Own doctrine only; cross-pack leakage blocked | fidelity golden/forbidden cases | pack/prompt/model | T2 free | pending |
 | Unsafe mutations | proposal/commit once and session isolation | D1 API integration | mutation code | T1 free | pending |
+| Forgeable ownership | Signed-cookie tamper, expiry, version, omission, forged header, replay | session/API ownership contracts | session/cookie/key rotation | T1 free | hardening worktree |
+| Commit race | DB unique invariants + two racing commit attempts leave one action/audit | in-memory SQLite migration behavior | migration/commit SQL | T1 free | hardening worktree |
+| Retrieval injection | Personal/source poison cannot alter appointments, invoked agents, evidence ownership, recommendation fields, or mutation authority | red-team fixture eval | retrieval/prompt/validator | T2 free | hardening worktree |
+| Semantically irrelevant citation | Correct-lane/correct-advisor but unrelated passage fails | per-pack positive/negative support calibration | source/claim/threshold | T2 free | hardening worktree |
+| Pipeline mixing | Manifest hash binds runtime config and immutable vector schema | manifest/hash contract | any pipeline component | T0/T1 free | hardening worktree |
+| Unbounded operation | Councillor/top-k/body/output/rate/timeout/subrequest caps | limit and cancellation contracts | limits/runtime | T1 free | hardening worktree |
 | SDK incompatibility | Worker bundle/import succeeds | Wrangler dry-run + Miniflare import | dependency/runtime change | T0/T1 free | pending |
 | Model regression | Live distinct agents + structured output | fixed OpenAI smoke set | authorized credential + phase boundary | T3 paid | blocked |
 | Browser integration | Real WebMCP journey/state reconciliation | deployed golden journey | each deployed SHA | T4 | blocked |

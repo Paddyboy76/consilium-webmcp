@@ -26,7 +26,7 @@ Human + chosen browser agent
         └─ Citation guardrail → proposal → explicit commit
 ```
 
-The deterministic fixture adapter makes causality and safety reproducible without a credential. It proves that relevant history changes advice and irrelevant history does not. The production adapter constructs genuine OpenAI Agents SDK specialists-as-tools with `gpt-5.6-sol` as chair, `gpt-5.6-terra` specialists, and `text-embedding-3-large` at 1536 dimensions. Worker bundling is proven; paid execution fails closed until a deployer supplies a separately authorized Worker secret.
+The deterministic fixture adapter makes causality and safety reproducible without a credential. It proves that relevant history changes advice and irrelevant history does not. Production reasoning constructs genuine OpenAI Agents SDK specialists-as-tools with `gpt-5.6-sol` as chair and `gpt-5.6-terra` specialists; paid reasoning fails closed until a deployer supplies a separately authorized Worker secret. Production retrieval independently uses Workers AI `@cf/baai/bge-base-en-v1.5` (768 dimensions) and one cosine Vectorize index.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md), [SECURITY.md](SECURITY.md), [DEMO.md](DEMO.md), and [PREEXISTING.md](PREEXISTING.md).
 

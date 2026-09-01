@@ -1,41 +1,39 @@
-# Phase 2 status
+# Phase 2 hardening status
 
 Updated: 2026-09-01 UTC
 
-## Current phase
-Worker architecture, longitudinal domain, source-fidelity, retrieval, and council foundation implemented. Local D1/Miniflare integration and external activation remain blocked.
+## Checkpoint and scope
+- Start checkpoint: `2dfb0b21b4908ad316c5549959ead9aa66824440` on `main`.
+- Targeted hardening only; longitudinal memory, causal advice, dual grounding, appointed councillors, source fidelity, fail-closed validation, and eight-tool WebMCP flow are preserved.
+- No redesign, deployment, resource creation, credential inspection, or paid OpenAI call occurred.
 
-## Preserved checkpoint
-- Baseline: `be5b4f10fcfa25286cf8e27f4649f6da701291af` on `main`.
-- Python prototype remains intact under `app/` and `tests/`; it has not been weakened or removed.
+## Completion evidence
 
-## Completed evidence
-- Four ADRs: runtime/storage, append-oriented history, dual-lane RAG/citations, Agents SDK compatibility.
-- One Worker serves API/assets with D1, Vectorize, and explicit fixture/OpenAI adapter boundary.
-- D1 migration models users/sessions, projects/goals/commitments, immutable timeline events, recommendation responses/outcomes, versioned patterns and counterevidence, source packs/chunks, appointments, consultations/reports, proposals/commits, vector metadata, and audit events.
-- Synthetic 67-day history includes supported overload, rejected false morning pattern, successful adaptation, rejected advice, accepted failure, accepted success, goal changes, constraints, and recency shift.
-- Counterfactual evaluation proves relevant history changes advice; negative control proves irrelevant memory does not.
-- Three public-domain source packs with exact edition/translator metadata, canonical URLs, doctrine/anti-drift profiles, stable locators, and SHA-256 verified excerpt files.
-- Personal and advisor Vectorize query contracts filter before top-k; advisor lane filters advisor + appointed pack version.
-- Every accepted personalized claim is dual-grounded. Invalid/polluted citations are excluded and force chair abstention.
-- Agents SDK graph constructs three distinct `gpt-5.6-terra` specialists as tools for a `gpt-5.6-sol` chair; Wrangler dry-run bundles it successfully without a paid call.
-- WebMCP exposes seven stable capabilities plus dynamic single-use commit, including pattern explanation and appointed-source provenance.
+1. **Production embeddings corrected.** ADR 0005 and `config/vectorize.production.json` bind one `consilium-evidence-bge768-v2` cosine index to Workers AI `@cf/baai/bge-base-en-v1.5`, 768 dimensions. Five string metadata indexes precede insertion; filters cap at 1800 bytes versus the verified 2048-byte platform limit. `session_id` is absent. The offline embedder is named `deterministic-test-fixture`.
+2. **Server-owned sessions.** `worker/session.ts` issues HMAC-signed, 24-hour, versioned `HttpOnly; Secure; SameSite=Strict` cookies using Worker secrets. Client session headers are ignored. Tamper, expiry, format/key version, omission, visible-header forgery, rotation, and cross-session replay contracts pass. This is demo session isolation, not identity authentication.
+3. **Race-safe commit.** Migration 0002 creates unique action/audit-per-proposal indexes. The Worker uses one transactional D1 `batch()` with conditional ownership/status update and `INSERT ... SELECT ... ON CONFLICT DO NOTHING`, then decides from D1 `meta.changes`. The SQLite migration behavioral test runs two racing attempts and leaves exactly one action and one audit record; cross-session commit leaves zero.
+4. **Both retrieval lanes hostile.** Model input is structurally delimited as untrusted data with no policy, appointment, secret, tool, evidence-ID, or mutation authority. Specialists contain the same contract; the chair sees validated reports only. Personal and source injection red teams preserve appointed/invoked agents, evidence ownership, decision fields, and empty mutation requests.
+5. **Semantic support layered.** Validation now checks IDs, lane, advisor, pack/version, canonical hash/locator, calibrated per-pack retrieval floor, claim type/support relationship, and pre-reviewed fixture claim mappings. Correct-advisor but unrelated citations fail with `SEMANTIC_SUPPORT_NOT_PRE_REVIEWED`; below-floor evidence fails.
+6. **Reproducibility.** `config/pipeline.json` hashes to `1f5efdc1c1ef895b221f8dba3ab9c6b64139eb4265eb33a154ba560aa761109f`. The hash is bound in Wrangler and recorded by pattern, vector, consultation, report, and recommendation schema/write paths. Incompatible pipelines require rebuild/supersession.
+7. **Operating limits.** Maximum 3 councillors, top-k 8 personal/6 advisor, 8 KiB body, 600-character question, bounded structured outputs, 25-second cancellation contract, 6 consultations/session/hour, 30,000 ms configured CPU, 40 configured subrequests, and 18 expected golden-journey subrequests.
+8. **Source/repository safeguards.** Per-edition US public-domain reasoning, separate raw acquisition and normalized hashes, normalization, and boilerplate/trademark exclusions are machine-readable in `sources/provenance.json` and tested.
 
-## Test triggers and results
-- T0 triggered by Worker/config/dependency changes: `npm run check` passed after final affected changes.
-- T1/T2 triggered by timeline, source, retrieval, validation, and mutation changes: **19 meaningful Vitest cases passed across 5 files**.
-- Worker dry-run passed with Wrangler 4.127.1; bundle sees D1, Vectorize, assets, and config.
-- Python baseline tests were not rerun because the Python implementation was unchanged.
-- T3 blocked: no authorized application API credential.
-- T4 blocked: no authorized deployment/native WebMCP browser preview.
+Detailed commands and proof mapping: `docs/HARDENING_EVIDENCE.md`.
 
-## Blockers / untested boundary
-- Wrangler local D1 migration/Miniflare attempts fail with sandbox `listen EPERM 127.0.0.1`. No bypass attempted. D1 API integration and browser journey therefore lack runtime proof here.
-- `wrangler types` generated the binding header but could not complete runtime types because the same socket restriction applies; the project uses published Workers types and strict T0 checks meanwhile.
-- Git writes are blocked: `.git/index.lock` cannot be created because `.git` is read-only. Phase 2 work remains an uncommitted worktree on preserved baseline `be5b4f1`.
-- No authorized `OPENAI_API_KEY`; live Responses/Agents and embeddings fail closed by design.
-- No deployment, DNS, Cloudflare resource creation, or publication attempted.
-- Vectorize index metadata-index creation and real D1/Vectorize hydration require authorized Cloudflare resources.
+## Verification
+- Affected T0/T1/T2 checks passed during implementation.
+- Latest pre-final complete suite: `npm run check && npm test` → **9 files, 41 tests passed; 0 failed**.
+- Final release-candidate T0/tests/Wrangler dry-run passed: **9 files, 41 tests, 0 failures**, 3 assets, 3898.56 KiB raw / 685.97 KiB gzip. Its combined shell then found only a trailing blank line in this status file; that was removed and `git diff --check` passed without rerunning unchanged suites.
+- Worktree scan and full tracked-history scan found no API keys, OAuth/token patterns, or private-key blocks. Tracked object-path scan found no Brain2, Next Shift, `.env`, `.dev.vars`, Chroma, or journal database paths.
+- Node SQLite applies migrations 0001+0002 and proves database uniqueness/ownership behavior without Miniflare.
+- T3 intentionally not run: no authorized OpenAI application credential.
+- T4 intentionally not run: no deployment/preview authority.
 
-## Next safe action
-Commit the verified Phase 2 work in an environment where `.git` is writable. External next step is an authorized Wrangler/Miniflare environment or deployment preview, then T4; T3 only after an explicitly supplied Worker secret.
+## Locally unprovable boundary
+- Wrangler local D1/Miniflare and `wrangler types` runtime generation require localhost socket creation; this sandbox returns `listen EPERM 127.0.0.1`.
+- Real Workers AI/Vectorize semantic retrieval requires authorized Cloudflare resources. Fixture embeddings are not claimed as production retrieval proof.
+- Workerd startup is unmeasured because of the socket restriction. Current official startup limit is one second; dry-run bundle size is recorded separately.
+- `SESSION_SIGNING_KEY` and optional previous rotation key must be supplied as Worker secrets before runtime; no secret is committed.
+
+## Next action
+The supervising shell should review and commit the clean hardening worktree if `.git` remains sandbox-read-only. In an authorized preview environment: create metadata indexes in manifest order, migrate D1, supply the session secret, run the browser T4 journey, and only later run T3 if an OpenAI reasoning secret is explicitly authorized.

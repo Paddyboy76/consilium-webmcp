@@ -25,7 +25,7 @@ The external agent can understand current priorities, search bounded memory, con
 Eight focused capabilities use the current `document.modelContext.registerTool` API, JSON schemas, read-only hints, and abort-signal registration lifecycle. One Cloudflare Worker serves the UI/API; D1 is canonical and Vectorize is derived. Personal and advisor retrieval paths use distinct pre-query metadata filters. The UI exposes pattern support, counterevidence, source editions, and every important tool result.
 
 ## OpenAI technology
-The implementation constructs OpenAI Agents SDK’s agents-as-tools manager pattern with `gpt-5.6-sol` for council synthesis, distinct `gpt-5.6-terra` specialists, Responses API, and `text-embedding-3-large` at 1536 dimensions. It bundles under Wrangler. Deterministic fixture mode proves advice causality and the complete safety flow without pretending live model execution when no separately authorized API credential is present.
+The implementation constructs OpenAI Agents SDK’s agents-as-tools manager pattern with `gpt-5.6-sol` for council synthesis and distinct `gpt-5.6-terra` specialists. It bundles under Wrangler. Retrieval uses Workers AI `@cf/baai/bge-base-en-v1.5` at 768 dimensions and one cosine Vectorize index. Deterministic fixture mode proves advice causality and safety without pretending live model execution or production semantic retrieval.
 
 ## Challenges and accomplishments
 The hardest problem was making agentic collaboration inspectable without exposing chain-of-thought, and making writes useful without weakening human control. We built safe operational tracing, evidence-ID validation, an injection fixture, deterministic reset, and a dynamic proposal→commit capability.
@@ -37,7 +37,7 @@ WebMCP becomes most valuable when capabilities encode product state and trust—
 Activate and benchmark the live Agents SDK adapter, deploy behind isolated Cloudflare HTTPS routing, validate in ChatGPT’s current built-in browser, and add private-memory pluggability without changing the public demo boundary.
 
 ## Built with
-WebMCP, OpenAI Agents SDK, Responses API, GPT-5.6 Sol, GPT-5.6 Terra, text-embedding-3-large, Python, SQLite, HTML/CSS/JavaScript, Cloudflare (deployment target).
+WebMCP, OpenAI Agents SDK, Responses API, GPT-5.6 Sol, GPT-5.6 Terra, Cloudflare Workers AI, Vectorize, D1, TypeScript, HTML/CSS/JavaScript.
 
 ## Links
 - Live URL: **pending deployment**
