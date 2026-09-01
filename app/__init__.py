@@ -1,0 +1,2 @@
+"""Consilium WebMCP Challenge Edition."""
+
