@@ -3,7 +3,7 @@ export const EMBEDDING_DIMENSIONS=768;
 export const MAX_FILTER_BYTES=1800;
 export const VECTOR_PIPELINE_VERSION='bge768-v2';
 
-export type VectorMatch={id:string;score?:number;metadata?:Record<string,string|number|boolean>};
+export type VectorMatch={id:string;score?:number;metadata?:Record<string,unknown>};
 export type VectorQueryResult={matches:VectorMatch[]};
 export interface VectorQueryLane { query(vector:number[],options:{topK:number;returnMetadata:'all';filter:Record<string,string>}):Promise<VectorQueryResult> }
 export interface Embedder { readonly kind:'workers-ai-production'|'deterministic-test-fixture'; readonly dimensions:number; embed(text:string):Promise<number[]> }
@@ -21,11 +21,16 @@ const embeddingFrom=(value:unknown)=>{
   if(!value||typeof value!=='object'||!('data' in value)||!Array.isArray(value.data)||!Array.isArray(value.data[0])||!value.data[0].every((item:unknown)=>typeof item==='number'))throw new Error('INVALID_EMBEDDING_RESPONSE');
   const vector=value.data[0];if(vector.length!==EMBEDDING_DIMENSIONS)throw new Error('INVALID_EMBEDDING_DIMENSIONS');return vector;
 };
+const embeddingsFrom=(value:unknown)=>{
+  if(!value||typeof value!=='object'||!('data' in value)||!Array.isArray(value.data)||!value.data.every(row=>Array.isArray(row)&&row.length===EMBEDDING_DIMENSIONS&&row.every((item:unknown)=>typeof item==='number')))throw new Error('INVALID_EMBEDDING_RESPONSE');
+  return value.data as number[][];
+};
 
 export class WorkersAiEmbedder implements Embedder {
   readonly kind='workers-ai-production' as const;readonly dimensions=EMBEDDING_DIMENSIONS;
   constructor(private readonly ai:WorkersAiBinding){}
   async embed(text:string){if(!text||text.length>4000)throw new Error('INVALID_EMBEDDING_INPUT');return embeddingFrom(await this.ai.run(EMBEDDING_MODEL,{text:[text]}))}
+  async embedMany(texts:string[]){if(!texts.length||texts.length>100||texts.some(text=>!text||text.length>4000))throw new Error('INVALID_EMBEDDING_BATCH');return embeddingsFrom(await this.ai.run(EMBEDDING_MODEL,{text:texts}))}
 }
 
 export class DeterministicFixtureEmbedder implements Embedder {

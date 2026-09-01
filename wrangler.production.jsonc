@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "consilium-webmcp",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": { "directory": "./web", "binding": "ASSETS", "run_worker_first": ["/api/*"] },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "consilium-webmcp-prod",
+    "database_id": "c8152314-29a6-49f4-8007-eba51b2a2b9e",
+    "migrations_dir": "migrations"
+  }],
+  "vectorize": [{ "binding": "VECTOR_INDEX", "index_name": "consilium-evidence-bge768-v2" }],
+  "ai": { "binding": "AI" },
+  "vars": {
+    "APP_MODE": "cloudflare",
+    "MODEL_CONFIG_VERSION": "deterministic-council-v1",
+    "PIPELINE_VERSION": "1f5efdc1c1ef895b221f8dba3ab9c6b64139eb4265eb33a154ba560aa761109f",
+    "CONSULTATION_LIMIT_PER_HOUR": "6",
+    "SESSION_KEY_VERSION": "k1",
+    "INGESTION_ENABLED": "false"
+  },
+  "observability": { "enabled": true, "head_sampling_rate": 1 }
+}

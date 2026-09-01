@@ -63,6 +63,7 @@ describe('dual-grounding and source fidelity',()=>{
     supported.claims[0]!.advisorEvidenceIds=[unrelatedId];expect(validateReport(supported,bundle).errors).toContain('SEMANTIC_SUPPORT_NOT_PRE_REVIEWED');
   });
   it.each(['marcus-aurelius','epictetus','sun-tzu'])('fails %s evidence below its calibrated retrieval floor',(advisorId)=>{const bundle=buildEvidenceBundle(question,buildSyntheticHistory()),report=structuredClone(fixtureReports(bundle).find(item=>item.advisorId===advisorId)!);const cited=report.claims[0]!.advisorEvidenceIds[0]!,source=bundle.sourceByAdvisor[advisorId]!.find(item=>item.id===cited)!;source.retrievalScore=0;expect(validateReport(report,bundle).errors).toContain('RETRIEVAL_SCORE_BELOW_FLOOR')});
+  it('uses a separate BGE cosine floor without weakening the fixture floor',()=>{const bundle=buildEvidenceBundle(question,buildSyntheticHistory()),report=structuredClone(fixtureReports(bundle).find(item=>item.advisorId==='marcus-aurelius')!),source=bundle.sourceByAdvisor['marcus-aurelius']!.find(item=>item.id==='marcus-b4-03')!;source.retrievalProvider='cloudflare-bge-cosine';source.retrievalScore=.459;expect(validateReport(report,bundle).valid).toBe(true);source.retrievalScore=.1;expect(validateReport(report,bundle).errors).toContain('RETRIEVAL_SCORE_BELOW_FLOOR')});
 
   it('renders canonical excerpts and locators from the owned source lane',()=>{
     const bundle=buildEvidenceBundle(question,buildSyntheticHistory());

@@ -2,7 +2,7 @@
 
 ## Outcome
 
-The repository is a reviewable Hetzner release candidate based on clean checkpoint `cede147620c65b14fa0b76ea9ed2a485b50a82d3`. Supervisor `npm run acceptance:hetzner` is now green through the hardened ephemeral-port/run-identity harness. All nine real-local-HTTP checkpoints passed, and the result explicitly made no OpenAI or remote Cloudflare calls. Deployment, production Workers AI/Vectorize retrieval, browser T4, and paid OpenAI application T3 remain separately unclaimed.
+The repository is a reviewable Cloudflare-backed release candidate based on clean checkpoint `cede147620c65b14fa0b76ea9ed2a485b50a82d3`. Supervisor local HTTP acceptance remains green, and the isolated workers.dev deployment now also passes D1 + Workers AI + Vectorize live acceptance. WebMCP-capable browser T4 and paid OpenAI application T3 remain separately unclaimed.
 
 ## What changed
 
@@ -32,13 +32,18 @@ For a fresh checkout, `npm run release:check` installs from `package-lock.json` 
 | Tested in-process | Strict TypeScript/ESLint passed; 10 test files / 42 tests passed |
 | Built/no-deploy | Wrangler 4.127.1 dry-run passed: 3 assets; 3903.40 KiB raw / 687.18 KiB gzip |
 | Tested via real local HTTP | Passed all nine supervisor checkpoints: health/cookie, memory/patterns, canonical evidence, council provenance, dual grounding, forgery isolation, atomic commit/replay rejection, reset ownership, and UI/WebMCP assets |
-| Externally untested | Workers AI/Vectorize runtime, deployed HTTPS/WebMCP browser T4, live URL |
+| Externally tested | Live D1 + Workers AI + Vectorize HTTP journey passed at the isolated workers.dev URL |
+| Externally untested | WebMCP-capable browser T4, custom domain/Access |
 | Intentionally blocked | OpenAI application T3/Agents runtime without separately authorized paid credential |
 
 ## Publication boundary
 
-No GitHub push, Cloudflare resource mutation, deploy, DNS/route change, secret creation, Hallermann change, or paid API call occurred. Follow `docs/CLOUDFLARE_PUBLICATION.md` only after verifying isolated account scope and receiving authority. Generate `SESSION_SIGNING_KEY` at publication time; never commit it. Do not configure `OPENAI_API_KEY` without distinct authorization.
+No GitHub push, custom DNS/route change, Hallermann change, or OpenAI application call occurred. Cloudflare mutations were limited to the named Consilium Worker, D1 database, Vectorize index/metadata indexes, and Worker session secret. The temporary ingestion secret was removed. Do not configure `OPENAI_API_KEY` without distinct authorization.
 
 ## P0 cut policy
 
 Never cut append-oriented memory, memory-shaped advice, causal/counterevidence proof, dual grounding, appointed source fidelity, canonical/semantic citation rejection, session ownership, atomic commit, injection resistance, safe trace, or the eight-tool WebMCP lifecycle.
+
+## Cloudflare handoff
+
+The isolated deployment is live at `https://consilium-webmcp.patrickhallermann.workers.dev`, current version `daca3fa4-a2e7-4dfb-87b1-e588b3f2496d`. D1 `consilium-webmcp-prod` and Vectorize `consilium-evidence-bge768-v2` contain only synthetic demo memory and packaged public-domain evidence. The bounded live journey passed D1 durability, real Workers AI/Vectorize retrieval, canonical hydration, dual grounding, source provenance, session/forgery isolation, atomic commit/replay rejection, reset ownership, and assets. Exact evidence and honest untested boundaries: `docs/CLOUDFLARE_LIVE_EVIDENCE.md`.

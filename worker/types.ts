@@ -11,5 +11,5 @@ export type AdvisorReport = z.infer<typeof AdvisorReportSchema>;
 
 export type TimelineEvent = { id:string; occurredAt:string; type:string; subjectId:string; valence:'positive'|'negative'|'neutral'; magnitude:number; text:string; tags:string[] };
 export type Pattern = { id:string; name:string; assertion:string; status:'active'|'rejected'; confidence:number; windowStart:string; windowEnd:string; algorithmVersion:string; supportingIds:string[]; contradictoryIds:string[] };
-export type SourceChunk = { id:string; advisorId:string; packId:string; packVersion:string; locator:string; text:string; canonicalHash:string; retrievalScore:number };
+export type SourceChunk = { id:string; advisorId:string; packId:string; packVersion:string; locator:string; text:string; canonicalHash:string; retrievalScore:number; retrievalProvider?:'cloudflare-bge-cosine' };
 export type EvidenceBundle = { question:string; goals:string[]; constraints:TimelineEvent[]; history:TimelineEvent[]; priorAdvice:TimelineEvent[]; outcomes:TimelineEvent[]; adaptations:TimelineEvent[]; patterns:Pattern[]; sourceByAdvisor:Record<string,SourceChunk[]> };

@@ -1,6 +1,6 @@
-# Cloudflare publication plan — do not execute during the Hetzner sprint
+# Cloudflare publication record and remaining plan
 
-These commands are a reviewed handoff, not authorization. Use a new isolated Cloudflare account/environment and verify the active account before every mutation. Never touch the existing Hallermann Worker, routes, DNS, or services.
+Provisioning through workers.dev is complete on the verified patadmin account. The exact executed resource IDs and proof are in `docs/CLOUDFLARE_LIVE_EVIDENCE.md`. No Hallermann Worker, route, DNS record, database, index, or service was touched. The steps below remain the rollback/reference plan; custom-domain publication and GitHub publication are not authorized or executed.
 
 1. Create a production D1 database and replace only the placeholder production `database_id` in a publication-specific Wrangler config: `npx wrangler d1 create consilium-webmcp-prod`.
 2. Create the immutable index: `npx wrangler vectorize create consilium-evidence-bge768-v2 --dimensions=768 --metric=cosine`.

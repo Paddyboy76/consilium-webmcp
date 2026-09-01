@@ -2,9 +2,10 @@ import { buildEvidenceBundle, buildSyntheticHistory, fixtureReports, inferPatter
 import { createAgentGraph } from './model';
 import { resolveSession } from './session';
 import { OPERATING_LIMITS } from './limits';
-import { retrievePersonal, WorkersAiEmbedder, type VectorQueryLane } from './retrieval';
+import { retrieveAdvisor, retrievePersonal, vectorMetadata, WorkersAiEmbedder } from './retrieval';
+import type { EvidenceBundle, SourceChunk, TimelineEvent } from './types';
 
-type Bindings={DB:D1Database;VECTOR_INDEX:VectorizeIndex;AI:Ai;ASSETS:Fetcher;APP_MODE:'fixture'|'openai';MODEL_CONFIG_VERSION:string;PIPELINE_VERSION:string;CONSULTATION_LIMIT_PER_HOUR:string;SESSION_KEY_VERSION:string;ACCEPTANCE_DIAGNOSTICS?:string;ACCEPTANCE_INSTANCE_ID?:string;SESSION_PREVIOUS_KEY_VERSION?:string;SESSION_SIGNING_KEY?:string;SESSION_PREVIOUS_SIGNING_KEY?:string;OPENAI_API_KEY?:string};
+type Bindings={DB:D1Database;VECTOR_INDEX:VectorizeIndex;AI:Ai;ASSETS:Fetcher;APP_MODE:'fixture'|'cloudflare'|'openai';MODEL_CONFIG_VERSION:string;PIPELINE_VERSION:string;CONSULTATION_LIMIT_PER_HOUR:string;SESSION_KEY_VERSION:string;INGESTION_ENABLED?:string;ACCEPTANCE_DIAGNOSTICS?:string;ACCEPTANCE_INSTANCE_ID?:string;SESSION_PREVIOUS_KEY_VERSION?:string;SESSION_SIGNING_KEY?:string;SESSION_PREVIOUS_SIGNING_KEY?:string;INGESTION_KEY?:string;OPENAI_API_KEY?:string};
 const json=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'}});
 const parseStoredJson=(value:unknown):unknown=>JSON.parse(String(value)) as unknown;
 const boundedBody=async(request:Request):Promise<Record<string,unknown>>=>{if(Number(request.headers.get('content-length')??0)>OPERATING_LIMITS.maxBodyBytes)throw new Error('REQUEST_TOO_LARGE');const value:unknown=await request.json();if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('INVALID_JSON_OBJECT');return Object.fromEntries(Object.entries(value))};
@@ -44,13 +45,54 @@ async function context(env:Bindings,session:string){
   await ensureSession(env.DB,session);
   const pending=await env.DB.prepare("SELECT id,text,rationale,status FROM proposals WHERE session_id=? AND status='pending' LIMIT 1").bind(session).first();
   const actions=await env.DB.prepare("SELECT id,text,status,created_at FROM actions WHERE user_id='demo-user' AND proposal_id IN (SELECT id FROM proposals WHERE session_id=?) ORDER BY created_at").bind(session).all();
-  const history=buildSyntheticHistory();
+  const history=env.APP_MODE==='fixture'?buildSyntheticHistory():await loadCanonicalHistory(env.DB);
   return {persona:{id:'demo-user',name:'Maya Chen'},goals:[{id:'goal-pilot',title:'Validate accessibility audit pilot'}],today:{available_minutes:45,priorities:['Pilot outreach','Client delivery']},historySummary:{days:67,eventCount:history.length,from:history[0]?.occurredAt,to:history.at(-1)?.occurredAt},patterns:inferPatterns(history),appointments:['marcus-aurelius','epictetus','sun-tzu'],pendingProposal:pending,pending_proposal:pending,actions:actions.results};
+}
+
+async function loadCanonicalHistory(db:D1Database):Promise<TimelineEvent[]>{
+  const rows=await db.prepare("SELECT id,occurred_at,event_type,subject_id,valence,magnitude,payload_json FROM events WHERE user_id='demo-user' ORDER BY occurred_at,id").all<Record<string,unknown>>();
+  return rows.results.map(row=>{const payload=parseStoredJson(row.payload_json) as {text?:unknown;tags?:unknown};return {id:String(row.id),occurredAt:String(row.occurred_at),type:String(row.event_type),subjectId:String(row.subject_id),valence:String(row.valence) as TimelineEvent['valence'],magnitude:Number(row.magnitude),text:typeof payload.text==='string'?payload.text:'',tags:Array.isArray(payload.tags)?payload.tags.filter((tag):tag is string=>typeof tag==='string'):[]}});
+}
+
+async function canonicalCouncil(env:Bindings,session:string){
+  await ensureSession(env.DB,session);
+  const rows=await env.DB.prepare("SELECT sc.id,sc.advisor_id,sc.pack_id,sp.version,sc.locator,sc.canonical_text,sc.normalized_hash,sp.author,sp.title,sp.translator,sp.edition,sp.publication_year,sp.public_domain_basis,sp.canonical_url,sp.source_sha256 FROM council_appointments ca JOIN source_packs sp ON sp.id=ca.pack_id JOIN source_chunks sc ON sc.pack_id=sp.id WHERE ca.user_id='demo-user' AND ca.ended_at IS NULL ORDER BY sc.advisor_id,sc.ordinal").all<Record<string,unknown>>();
+  return {appointed:[...new Set(rows.results.map(row=>String(row.advisor_id)))],sourceChunks:rows.results.map(row=>({id:row.id,advisorId:row.advisor_id,packId:row.pack_id,packVersion:row.version,locator:row.locator,excerpt:row.canonical_text,canonicalHash:row.normalized_hash,author:row.author,title:row.title,translator:row.translator,edition:row.edition,publicationYear:row.publication_year,publicDomainBasis:row.public_domain_basis,canonicalUrl:row.canonical_url,sourceSha256:row.source_sha256}))};
+}
+
+async function hydrateAdvisorMatches(env:Bindings,matches:{id:string;score?:number}[]):Promise<SourceChunk[]>{
+  if(!matches.length)return [];
+  const rows=await env.DB.batch(matches.map(match=>env.DB.prepare("SELECT sc.id,sc.advisor_id,sc.pack_id,sp.version,sc.locator,sc.canonical_text,sc.normalized_hash FROM vector_records vr JOIN source_chunks sc ON sc.id=vr.canonical_id JOIN source_packs sp ON sp.id=sc.pack_id WHERE vr.id=? AND vr.corpus_kind='advisor' AND vr.pipeline_hash=?").bind(match.id,env.PIPELINE_VERSION)));
+  return rows.flatMap((result,index)=>(result.results as Record<string,unknown>[]).map(row=>({id:String(row.id),advisorId:String(row.advisor_id),packId:String(row.pack_id),packVersion:String(row.version),locator:String(row.locator),text:String(row.canonical_text),canonicalHash:String(row.normalized_hash),retrievalScore:matches[index]?.score??0,retrievalProvider:'cloudflare-bge-cosine'})));
+}
+
+async function cloudflareEvidence(env:Bindings,question:string,history:TimelineEvent[]):Promise<{bundle:EvidenceBundle;retrieval:{provider:string;model:string;personal:{id:string;score?:number}[];advisor:Record<string,{id:string;score?:number}[]>}}>{
+  const embedder=new WorkersAiEmbedder(env.AI),vector=await embedder.embed(question),index=env.VECTOR_INDEX;
+  const personal=(await retrievePersonal(index,vector,'demo-user')).matches;
+  const appointed=[{id:'marcus-aurelius',pack:'pg2680-2026-07-13-v1'},{id:'epictetus',pack:'pg10661-v1'},{id:'sun-tzu',pack:'pg132-2024-10-29-v1'}];
+  const queried=await Promise.all(appointed.map(async advisor=>({advisor,...await retrieveAdvisor(index,vector,advisor.id,advisor.pack)})));
+  const sourceByAdvisor:Record<string,SourceChunk[]>={};for(const item of queried)sourceByAdvisor[item.advisor.id]=await hydrateAdvisorMatches(env,item.matches);
+  const base=buildEvidenceBundle(question,history),bundle={...base,sourceByAdvisor};
+  return {bundle,retrieval:{provider:'cloudflare-workers-ai-vectorize',model:'@cf/baai/bge-base-en-v1.5',personal:personal.map(({id,score})=>({id,score})),advisor:Object.fromEntries(queried.map(item=>[item.advisor.id,item.matches.map(({id,score})=>({id,score}))]))}};
+}
+
+const safeSecretEqual=async(left:string,right:string)=>{const digest=async(value:string)=>new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value))),a=await digest(left),b=await digest(right);let difference=0;for(let index=0;index<a.length;index++)difference|=a[index]!^b[index]!;return difference===0};
+const sha256=async(value:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value))),byte=>byte.toString(16).padStart(2,'0')).join('');
+
+async function ingestProductionVectors(env:Bindings){
+  const history=await loadCanonicalHistory(env.DB),personalTexts=history.map(item=>`${item.occurredAt} ${item.type} ${item.text} ${item.tags.join(' ')}`),advisorTexts=SOURCE_CHUNKS.map(item=>`${item.advisorId} ${item.locator} ${item.text}`),embedder=new WorkersAiEmbedder(env.AI);
+  const [personalVectors,advisorVectors]=await Promise.all([embedder.embedMany(personalTexts),embedder.embedMany(advisorTexts)]);
+  const personal=await Promise.all(history.map(async(item,index)=>({id:`vec-${item.id}`,values:personalVectors[index]!,metadata:vectorMetadata({corpusKind:'personal',userId:'demo-user'}),record:{id:`vec-${item.id}`,canonicalId:item.id,kind:'personal',userId:'demo-user',advisorId:'',packVersion:'',hash:await sha256(personalTexts[index]!)}})));
+  const advisor=await Promise.all(SOURCE_CHUNKS.map(async(item,index)=>({id:`vec-${item.id}`,values:advisorVectors[index]!,metadata:vectorMetadata({corpusKind:'advisor',advisorId:item.advisorId,packVersion:item.packVersion}),record:{id:`vec-${item.id}`,canonicalId:item.id,kind:'advisor',userId:'',advisorId:item.advisorId,packVersion:item.packVersion,hash:await sha256(advisorTexts[index]!)}})));
+  await env.VECTOR_INDEX.upsert([...personal,...advisor].map(({id,values,metadata})=>({id,values,metadata})));
+  const records=[...personal,...advisor].map(item=>item.record);
+  await env.DB.prepare("INSERT OR REPLACE INTO vector_records(id,canonical_id,corpus_kind,user_id,advisor_id,pack_version,content_hash,embedding_model,dimensions,embedding_version,indexed_at,pipeline_hash) SELECT json_extract(value,'$.id'),json_extract(value,'$.canonicalId'),json_extract(value,'$.kind'),NULLIF(json_extract(value,'$.userId'),''),NULLIF(json_extract(value,'$.advisorId'),''),NULLIF(json_extract(value,'$.packVersion'),''),json_extract(value,'$.hash'),'@cf/baai/bge-base-en-v1.5',768,'bge768-v2',datetime('now'),? FROM json_each(?)").bind(env.PIPELINE_VERSION,JSON.stringify(records)).run();
+  return {personal:personal.length,advisor:advisor.length,total:records.length,provider:'cloudflare-workers-ai',model:'@cf/baai/bge-base-en-v1.5',dimensions:768};
 }
 
 async function livePersonalMemory(env:Bindings,query:string){
   const embedder=new WorkersAiEmbedder(env.AI),vector=await embedder.embed(query);
-  const matches=(await retrievePersonal(env.VECTOR_INDEX as unknown as VectorQueryLane,vector,'demo-user')).matches.slice(0,8);
+  const matches=(await retrievePersonal(env.VECTOR_INDEX,vector,'demo-user')).matches.slice(0,8);
   if(!matches.length)return {results:[],contentTrust:'untrusted_data',retrievalMode:'workers-ai-bge768'};
   const rows=await env.DB.batch(matches.map(match=>env.DB.prepare("SELECT e.id,e.occurred_at,e.event_type,e.subject_id,e.valence,e.magnitude,e.payload_json,e.provenance FROM vector_records v JOIN events e ON e.id=v.canonical_id WHERE v.id=? AND v.corpus_kind='personal' AND v.user_id='demo-user' AND v.pipeline_hash=? AND e.user_id='demo-user'").bind(match.id,env.PIPELINE_VERSION)));
   const results=rows.flatMap((result,index)=>(result.results as Record<string,unknown>[]).map(row=>({...row,payload_json:undefined,payload:parseStoredJson(row.payload_json),score:matches[index]?.score,untrusted:true})));
@@ -59,26 +101,31 @@ async function livePersonalMemory(env:Bindings,query:string){
 
 async function route(request:Request,env:Bindings,session:string):Promise<Response>{
   const url=new URL(request.url);
-  if(url.pathname==='/api/health') return json({status:'ok',runtime:'cloudflare-worker',mode:env.APP_MODE,modelConfigured:Boolean(env.OPENAI_API_KEY),...(env.ACCEPTANCE_DIAGNOSTICS==='safe-seed-stage'?{acceptanceInstance:env.ACCEPTANCE_INSTANCE_ID}: {})});
+  if(url.pathname==='/api/health') return json({status:'ok',runtime:'cloudflare-worker',mode:env.APP_MODE,reasoningMode:env.APP_MODE==='cloudflare'?'deterministic-dual-grounded':env.APP_MODE,modelConfigured:Boolean(env.OPENAI_API_KEY),openaiConfigured:Boolean(env.OPENAI_API_KEY),retrievalMode:env.APP_MODE==='cloudflare'?'workers-ai-vectorize':'deterministic-fixture',...(env.ACCEPTANCE_DIAGNOSTICS==='safe-seed-stage'?{acceptanceInstance:env.ACCEPTANCE_INSTANCE_ID}: {})});
   if(url.pathname==='/api/context') return json(await context(env,session));
-  if(url.pathname==='/api/memory') {const query=(url.searchParams.get('q')??'').toLowerCase().slice(0,300);if(query.length<2)return json({error:'INVALID_MEMORY_QUERY'},400);if(env.APP_MODE==='openai')return json(await livePersonalMemory(env,query));const terms=query.split(/\W+/).filter(x=>x.length>2);const results=buildSyntheticHistory().map(item=>({item,score:terms.filter(term=>`${item.text} ${item.tags.join(' ')}`.toLowerCase().includes(term)).length})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||b.item.occurredAt.localeCompare(a.item.occurredAt)).slice(0,8).map(x=>({...x.item,untrusted:true}));return json({results,contentTrust:'untrusted_data',retrievalMode:'deterministic-fixture'})}
-  if(url.pathname==='/api/patterns'){await ensureSession(env.DB,session);const count=await env.DB.prepare("SELECT COUNT(*) AS count FROM events WHERE user_id='demo-user'").first();return json({patterns:inferPatterns(buildSyntheticHistory()),canonicalEventCount:count?.count})}
-  if(url.pathname.startsWith('/api/patterns/')){const found=inferPatterns(buildSyntheticHistory()).find(p=>p.id===url.pathname.split('/').at(-1));return found?json(found):json({error:'not found'},404)}
-  if(url.pathname==='/api/council'&&request.method==='GET') return json({appointed:['marcus-aurelius','epictetus','sun-tzu'],sourceChunks:SOURCE_CHUNKS.map(({text,...safe})=>({...safe,excerpt:text}))});
+  if(url.pathname==='/api/memory') {const query=(url.searchParams.get('q')??'').toLowerCase().slice(0,300);if(query.length<2)return json({error:'INVALID_MEMORY_QUERY'},400);if(env.APP_MODE==='cloudflare')return json(await livePersonalMemory(env,query));const terms=query.split(/\W+/).filter(x=>x.length>2);const results=buildSyntheticHistory().map(item=>({item,score:terms.filter(term=>`${item.text} ${item.tags.join(' ')}`.toLowerCase().includes(term)).length})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||b.item.occurredAt.localeCompare(a.item.occurredAt)).slice(0,8).map(x=>({...x.item,untrusted:true}));return json({results,contentTrust:'untrusted_data',retrievalMode:'deterministic-fixture'})}
+  if(url.pathname==='/api/patterns'){await ensureSession(env.DB,session);const history=env.APP_MODE==='fixture'?buildSyntheticHistory():await loadCanonicalHistory(env.DB);return json({patterns:inferPatterns(history),canonicalEventCount:history.length})}
+  if(url.pathname.startsWith('/api/patterns/')){const history=env.APP_MODE==='fixture'?buildSyntheticHistory():await loadCanonicalHistory(env.DB),found=inferPatterns(history).find(p=>p.id===url.pathname.split('/').at(-1));return found?json(found):json({error:'not found'},404)}
+  if(url.pathname==='/api/council'&&request.method==='GET') return json(env.APP_MODE==='fixture'?{appointed:['marcus-aurelius','epictetus','sun-tzu'],sourceChunks:SOURCE_CHUNKS.map(({text,...safe})=>({...safe,excerpt:text}))}:await canonicalCouncil(env,session));
   if(url.pathname==='/api/advisors'&&request.method==='GET') return json({advisors:[{id:'marcus-aurelius',name:'Marcus Aurelius',focus:'Present duty and judgment'},{id:'epictetus',name:'Epictetus',focus:'Agency and controllable action'},{id:'sun-tzu',name:'Sun Tzu',focus:'Conditions, adaptation, and avoiding waste'}],sources:SOURCE_CHUNKS});
   if(url.pathname==='/api/reset'&&request.method==='POST'){await ensureSession(env.DB,session);await env.DB.batch([env.DB.prepare("DELETE FROM advisor_reports WHERE consultation_id IN (SELECT id FROM consultations WHERE session_id=?)").bind(session),env.DB.prepare("DELETE FROM consultations WHERE session_id=?").bind(session),env.DB.prepare("DELETE FROM actions WHERE proposal_id IN (SELECT id FROM proposals WHERE session_id=?)").bind(session),env.DB.prepare("DELETE FROM audit_events WHERE session_id=?").bind(session),env.DB.prepare("DELETE FROM proposals WHERE session_id=?").bind(session)]);return json(await context(env,session))}
   if((url.pathname==='/api/council/consult'||url.pathname==='/api/council')&&request.method==='POST'){
     const body=await boundedBody(request), question=body.question;
     if(typeof question!=='string'||question.length<3||question.length>OPERATING_LIMITS.maxQuestionChars)return json({error:'INVALID_QUESTION'},400);
-    if(request.signal.aborted)return json({error:'CONSULTATION_CANCELLED'},499);if(env.APP_MODE==='openai'&&!env.OPENAI_API_KEY)return json({error:'MODEL_CONFIGURATION_ERROR'},503);
+    if(request.signal.aborted)return json({error:'CONSULTATION_CANCELLED'},499);if(env.APP_MODE==='openai')return json({error:env.OPENAI_API_KEY?'OPENAI_RUNTIME_NOT_PROVEN':'MODEL_CONFIGURATION_ERROR'},503);
     const recent=await env.DB.prepare("SELECT COUNT(*) AS count FROM consultations WHERE session_id=? AND created_at >= datetime('now','-1 hour')").bind(session).first<{count:number}>();if((recent?.count??0)>=Number(env.CONSULTATION_LIMIT_PER_HOUR))return json({error:'CONSULTATION_RATE_LIMIT'},429);
-    await ensureSession(env.DB,session);const bundle=buildEvidenceBundle(question,buildSyntheticHistory()); const reports=fixtureReports(bundle); const decision=synthesize(bundle,reports);const traceId=`trace-${crypto.randomUUID()}`;
+    await ensureSession(env.DB,session);const history=env.APP_MODE==='fixture'?buildSyntheticHistory():await loadCanonicalHistory(env.DB),grounding=env.APP_MODE==='cloudflare'?await cloudflareEvidence(env,question,history):{bundle:buildEvidenceBundle(question,history),retrieval:null},bundle=grounding.bundle; const reports=fixtureReports(bundle); const decision=synthesize(bundle,reports);const traceId=`trace-${crypto.randomUUID()}`;
     const safeBundle={goals:bundle.goals,personalIds:bundle.history.map(e=>e.id),outcomeIds:bundle.outcomes.map(e=>e.id),patterns:bundle.patterns};
     await env.DB.prepare("INSERT INTO consultations(id,user_id,session_id,question,evidence_bundle_json,model_config_version,status,pipeline_hash,created_at) VALUES(?,'demo-user',?,?,?,?, 'completed',?,datetime('now'))").bind(traceId,session,question,JSON.stringify(safeBundle),env.MODEL_CONFIG_VERSION,env.PIPELINE_VERSION).run();
     await env.DB.batch(reports.map(report=>{const validation=synthesize(bundle,[report]);return env.DB.prepare("INSERT INTO advisor_reports(id,consultation_id,advisor_id,report_json,validation_json,abstained,pipeline_hash,created_at) VALUES(?,?,?,?,?,?,?,datetime('now'))").bind(crypto.randomUUID(),traceId,report.advisorId,JSON.stringify(report),JSON.stringify({valid:!validation.abstained}),report.abstained?1:0,env.PIPELINE_VERSION)}));
     const recommendationId=`recommendation-${crypto.randomUUID()}`;if(!decision.abstained){await env.DB.batch([env.DB.prepare("INSERT INTO recommendations(id,user_id,consultation_id,text,producer,pipeline_hash,created_at) VALUES(?,'demo-user',?,?,'council-chair',?,datetime('now'))").bind(recommendationId,traceId,decision.recommendation,env.PIPELINE_VERSION),...decision.personalEvidenceIds.map(id=>env.DB.prepare("INSERT INTO recommendation_evidence(recommendation_id,evidence_id,lane) VALUES(?,?,'personal')").bind(recommendationId,id)),...decision.advisorEvidenceIds.map(id=>env.DB.prepare("INSERT INTO recommendation_evidence(recommendation_id,evidence_id,lane) VALUES(?,?,'advisor')").bind(recommendationId,id))])}
     const events=[{stage:'Evidence bundle',status:'complete',detail:`${bundle.history.length} relevant timeline events retrieved before advice`},...reports.map(report=>({stage:report.advisorId,status:report.abstained?'abstained':'validated',detail:report.recommendation})),{stage:'Dual-grounding guardrail',status:decision.abstained?'failed':'passed',detail:'Every accepted personalized claim has personal and appointed-source IDs'}];
-    return json({traceId,trace_id:traceId,recommendationId:decision.abstained?null:recommendationId,modelMode:'fixture',modelConfigVersion:env.MODEL_CONFIG_VERSION,pipelineVersion:env.PIPELINE_VERSION,evidenceBundle:safeBundle,reports,decision,recommendation:decision.recommendation,events,validation:{allDisplayedEvidenceCanonical:true,dualGrounded:!decision.abstained,persistent_mutation:false}});
+    return json({traceId,trace_id:traceId,recommendationId:decision.abstained?null:recommendationId,modelMode:env.APP_MODE==='cloudflare'?'deterministic-cloudflare-dual-grounded':'fixture',modelConfigVersion:env.MODEL_CONFIG_VERSION,pipelineVersion:env.PIPELINE_VERSION,retrieval:grounding.retrieval,evidenceBundle:safeBundle,reports,decision,recommendation:decision.recommendation,events,validation:{allDisplayedEvidenceCanonical:true,dualGrounded:!decision.abstained,persistent_mutation:false}});
+  }
+  if(url.pathname==='/api/admin/ingest-vectors'&&request.method==='POST'){
+    if(env.APP_MODE!=='cloudflare'||env.INGESTION_ENABLED!=='true'||!env.INGESTION_KEY)return json({error:'NOT_FOUND'},404);
+    const supplied=request.headers.get('authorization')?.replace(/^Bearer /,'')??'';if(!supplied||!await safeSecretEqual(supplied,env.INGESTION_KEY))return json({error:'NOT_FOUND'},404);
+    await ensureSession(env.DB,session);return json(await ingestProductionVectors(env));
   }
   if(url.pathname.startsWith('/api/traces/')&&request.method==='GET'){
     const traceId=url.pathname.split('/').at(-1)??'';if(!/^trace-[0-9a-f-]{36}$/.test(traceId))return json({error:'INVALID_TRACE_ID'},400);

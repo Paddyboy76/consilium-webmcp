@@ -10,7 +10,8 @@
     "db:migrate": "wrangler d1 migrations apply consilium-webmcp-local --local",
     "deploy:check": "wrangler deploy --dry-run",
     "acceptance:hetzner": "bash scripts/hetzner-acceptance.sh",
-    "release:check": "bash scripts/release-check.sh"
+    "release:check": "bash scripts/release-check.sh",
+    "deploy:production": "wrangler deploy --config wrangler.production.jsonc"
   },
   "dependencies": {
     "@openai/agents": "latest",

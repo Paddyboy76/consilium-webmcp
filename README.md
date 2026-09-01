@@ -14,6 +14,8 @@ npm run release:check
 
 It installs the lockfile exactly with `npm ci`, runs static checks, the 42 meaningful tests, a no-deploy Worker build, and an isolated loopback HTTP acceptance journey. The latter uses deterministic fixture reasoning, temporary D1 state, migrations 0001 and 0002, and a restrictive temporary signing-secret env file. The current supervisor run passed all nine checkpoints without an OpenAI or remote Cloudflare call. See [docs/HETZNER_ACCEPTANCE.md](docs/HETZNER_ACCEPTANCE.md).
 
+The isolated Cloudflare release is live at [consilium-webmcp.patrickhallermann.workers.dev](https://consilium-webmcp.patrickhallermann.workers.dev). It uses remote D1, Workers AI BGE768 embeddings, and metadata-filtered Vectorize retrieval with deterministic dual-grounded council synthesis. It does not claim OpenAI Agents SDK runtime execution. See [docs/CLOUDFLARE_LIVE_EVIDENCE.md](docs/CLOUDFLARE_LIVE_EVIDENCE.md).
+
 ## 60-second judge test
 
 1. Run `npm ci`, `npm run db:migrate`, then supply a test-only `SESSION_SIGNING_KEY` to `npm run dev`, and open the Wrangler URL in a WebMCP-capable browser. For automated local proof, prefer `npm run acceptance:hetzner`.

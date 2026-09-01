@@ -40,7 +40,7 @@ Activate and benchmark the live Agents SDK adapter, deploy behind isolated Cloud
 WebMCP, OpenAI Agents SDK, Responses API, GPT-5.6 Sol, GPT-5.6 Terra, Cloudflare Workers AI, Vectorize, D1, TypeScript, HTML/CSS/JavaScript.
 
 ## Links
-- Live URL: **pending deployment**
+- Live URL: **https://consilium-webmcp.patrickhallermann.workers.dev**
 - Public repository: **pending GitHub authorization/publication audit**
 - Video: **pending recording/upload**
 
