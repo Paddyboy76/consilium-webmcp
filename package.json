@@ -8,7 +8,9 @@
     "test": "vitest run",
     "dev": "wrangler dev --local",
     "db:migrate": "wrangler d1 migrations apply consilium-webmcp-local --local",
-    "deploy:check": "wrangler deploy --dry-run"
+    "deploy:check": "wrangler deploy --dry-run",
+    "acceptance:hetzner": "bash scripts/hetzner-acceptance.sh",
+    "release:check": "bash scripts/release-check.sh"
   },
   "dependencies": {
     "@openai/agents": "latest",

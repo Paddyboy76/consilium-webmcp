@@ -29,9 +29,9 @@ const schemas = {
   consult_council:{type:'object',properties:{question:{type:'string',minLength:3,maxLength:600}},required:['question'],additionalProperties:false},
   explain_pattern:{type:'object',properties:{pattern_id:{type:'string',pattern:'^pat-[a-z0-9-]+$'}},required:['pattern_id'],additionalProperties:false},
   get_appointed_council:{type:'object',properties:{},additionalProperties:false},
-  inspect_council_run:{type:'object',properties:{trace_id:{type:'string',pattern:'^trace-[a-f0-9]{12}$'}},required:['trace_id'],additionalProperties:false},
+  inspect_council_run:{type:'object',properties:{trace_id:{type:'string',pattern:'^trace-[0-9a-f-]{36}$'}},required:['trace_id'],additionalProperties:false},
   propose_next_action:{type:'object',properties:{text:{type:'string',minLength:3,maxLength:240},rationale:{type:'string',maxLength:500}},required:['text','rationale'],additionalProperties:false},
-  commit_proposed_action:{type:'object',properties:{proposal_id:{type:'string',pattern:'^proposal-[a-f0-9]{12}$'}},required:['proposal_id'],additionalProperties:false}
+  commit_proposed_action:{type:'object',properties:{proposal_id:{type:'string',pattern:'^proposal-[0-9a-f-]{36}$'}},required:['proposal_id'],additionalProperties:false}
 };
 let commitController;
 const registered=[];
@@ -57,4 +57,5 @@ async function syncCommitTool(proposal){
   document.querySelector('#tool-count').textContent=`${registered.length} tools`;
 }
 setupWebMCP().then(refresh).catch(console.error);
+api('/api/health').then(health=>{const fixture=health.mode==='fixture';const label=document.querySelector('#reasoning-mode');label.textContent=fixture?'DETERMINISTIC FIXTURE · NO LIVE MODEL':'LIVE REASONING';label.classList.toggle('live',!fixture)}).catch(()=>{document.querySelector('#reasoning-mode').textContent='MODE UNAVAILABLE'});
 api('/api/patterns').then(({patterns})=>{const active=patterns.find(p=>p.id==='pat-adaptation-v1');if(!active)return;document.querySelector('#pattern-title').textContent=active.name;document.querySelector('#pattern-copy').textContent=`${active.assertion} Confidence ${Math.round(active.confidence*100)}%; ${active.windowStart.slice(0,10)}–${active.windowEnd.slice(0,10)}.`;document.querySelector('#pattern-evidence').innerHTML=`<span>${active.supportingIds.length} supporting events</span><span>${active.contradictoryIds.length} counterexamples</span><span>${active.algorithmVersion}</span>`});
