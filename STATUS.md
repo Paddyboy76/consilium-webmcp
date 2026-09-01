@@ -16,7 +16,7 @@ Updated: 2026-09-01 UTC
 | Tested in-process | Passed | Final suite: 10 files, 42 meaningful tests; fresh-migration Worker seed integration proves context plus 96 events, 3 patterns, 6 source chunks, and 3 appointments |
 | Built locally | Passed | Final `npm run release:check -- --skip-install --skip-http`: 3 assets, 3903.40 KiB raw / 687.18 KiB gzip; no deployment |
 | Tested through real local HTTP | Passed | Supervisor `npm run acceptance:hetzner` passed all nine checkpoints using the hardened ephemeral-port/run-identity harness. Result explicitly reported no OpenAI or remote Cloudflare calls. |
-| Externally tested | Passed for bounded HTTP; browser T4 untested | `consilium-webmcp.patrickhallermann.workers.dev` passed live D1 + Workers AI + Vectorize acceptance; WebMCP-capable browser interaction remains unclaimed |
+| Externally tested | Prior bounded HTTP passed; current browser rerun required | Browser review found and the repository repairs two contract bugs (memory limit and report/decision validation consistency). Current version is deployed but acceptance is not claimed until supervisor rerun. |
 | Intentionally blocked by missing authorization | Not claimed | OpenAI Agents/Responses application T3: real adapter remains fail-closed without separately authorized `OPENAI_API_KEY` |
 
 The repository remains reproducible from Hetzner and is now deployed to an isolated workers.dev hostname. “Live” here proves Cloudflare D1/Workers AI/Vectorize plus deterministic dual-grounded synthesis, not OpenAI model execution.
@@ -42,13 +42,13 @@ The repository remains reproducible from Hetzner and is now deployed to an isola
 
 ## Remaining external actions
 
-1. Run one WebMCP-capable browser T4 journey if browser evidence is required; do not add a custom route/domain without separate authority.
+1. Supervisor must rerun the WebMCP browser journey against version `1cdcd452-4a55-443a-98fa-058ee35260be`; do not reclaim acceptance or add a custom route/domain before that evidence.
 2. Only with separate paid-API authorization, configure the application’s OpenAI key and run T3. Codex-assisted evaluation is not T3.
 
 ## Cloudflare deployment
 
-- Worker version: `daca3fa4-a2e7-4dfb-87b1-e588b3f2496d`.
+- Worker version: `1cdcd452-4a55-443a-98fa-058ee35260be` (deployed for browser rerun; current acceptance pending).
 - D1: `consilium-webmcp-prod` (`c8152314-29a6-49f4-8007-eba51b2a2b9e`).
 - Vectorize: `consilium-evidence-bge768-v2`, BGE768/cosine, all five required metadata indexes created before 102-vector insertion.
-- Live proof: all ten checkpoints in `docs/CLOUDFLARE_LIVE_EVIDENCE.md` passed. Health and UI honestly distinguish deterministic Cloudflare council synthesis from unrun OpenAI runtime.
+- Live proof: the earlier ten-checkpoint HTTP journey passed, but later browser review exposed two real contract defects. Focused repairs/tests pass; the current deployed version requires supervisor browser rerun before acceptance can be reclaimed. Exact evidence is in `docs/CLOUDFLARE_LIVE_EVIDENCE.md`.
 - Isolation: workers.dev only; no custom route/DNS; no Hallermann resource touched; ingestion disabled and its secret removed.

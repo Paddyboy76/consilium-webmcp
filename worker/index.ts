@@ -62,15 +62,23 @@ async function canonicalCouncil(env:Bindings,session:string){
 
 async function hydrateAdvisorMatches(env:Bindings,matches:{id:string;score?:number}[]):Promise<SourceChunk[]>{
   if(!matches.length)return [];
-  const rows=await env.DB.batch(matches.map(match=>env.DB.prepare("SELECT sc.id,sc.advisor_id,sc.pack_id,sp.version,sc.locator,sc.canonical_text,sc.normalized_hash FROM vector_records vr JOIN source_chunks sc ON sc.id=vr.canonical_id JOIN source_packs sp ON sp.id=sc.pack_id WHERE vr.id=? AND vr.corpus_kind='advisor' AND vr.pipeline_hash=?").bind(match.id,env.PIPELINE_VERSION)));
+  const rows=await env.DB.batch(matches.map(match=>env.DB.prepare("SELECT sc.id,sc.advisor_id,sc.pack_id,sp.version,sc.locator,sc.canonical_text,sc.normalized_hash FROM vector_records vr JOIN source_chunks sc ON sc.id=vr.canonical_id JOIN source_packs sp ON sp.id=sc.pack_id JOIN council_appointments ca ON ca.pack_id=sp.id AND ca.advisor_id=sc.advisor_id WHERE vr.id=? AND vr.corpus_kind='advisor' AND vr.pipeline_hash=? AND ca.user_id='demo-user' AND ca.ended_at IS NULL").bind(match.id,env.PIPELINE_VERSION)));
   return rows.flatMap((result,index)=>(result.results as Record<string,unknown>[]).map(row=>({id:String(row.id),advisorId:String(row.advisor_id),packId:String(row.pack_id),packVersion:String(row.version),locator:String(row.locator),text:String(row.canonical_text),canonicalHash:String(row.normalized_hash),retrievalScore:matches[index]?.score??0,retrievalProvider:'cloudflare-bge-cosine'})));
 }
 
+const ADVISOR_RETRIEVAL_ANCHORS:Record<string,string>={
+  'marcus-aurelius':'present duty rather than escape or retreat; use the time already available',
+  epictetus:'act on what is in our control; outcomes and replies are outside our control',
+  'sun-tzu':'avoid a costly battle; test the objective directly under favorable conditions'
+};
+
 async function cloudflareEvidence(env:Bindings,question:string,history:TimelineEvent[]):Promise<{bundle:EvidenceBundle;retrieval:{provider:string;model:string;personal:{id:string;score?:number}[];advisor:Record<string,{id:string;score?:number}[]>}}>{
-  const embedder=new WorkersAiEmbedder(env.AI),vector=await embedder.embed(question),index=env.VECTOR_INDEX;
-  const personal=(await retrievePersonal(index,vector,'demo-user')).matches;
-  const appointed=[{id:'marcus-aurelius',pack:'pg2680-2026-07-13-v1'},{id:'epictetus',pack:'pg10661-v1'},{id:'sun-tzu',pack:'pg132-2024-10-29-v1'}];
-  const queried=await Promise.all(appointed.map(async advisor=>({advisor,...await retrieveAdvisor(index,vector,advisor.id,advisor.pack)})));
+  const embedder=new WorkersAiEmbedder(env.AI),index=env.VECTOR_INDEX;
+  const appointments=await env.DB.prepare("SELECT ca.advisor_id,sp.version FROM council_appointments ca JOIN source_packs sp ON sp.id=ca.pack_id WHERE ca.user_id='demo-user' AND ca.ended_at IS NULL ORDER BY ca.advisor_id LIMIT 3").all<{advisor_id:string;version:string}>(),appointed=appointments.results.map(row=>({id:row.advisor_id,pack:row.version}));
+  if(!appointed.length||appointed.some(advisor=>!ADVISOR_RETRIEVAL_ANCHORS[advisor.id]))throw new Error('APPOINTED_COUNCIL_CONFIGURATION_ERROR');
+  const vectors=await embedder.embedMany([question,...appointed.map(advisor=>`${question}\nGround this appointed ${advisor.id} lane in: ${ADVISOR_RETRIEVAL_ANCHORS[advisor.id]}`)]);
+  const personal=(await retrievePersonal(index,vectors[0]!,'demo-user')).matches;
+  const queried=await Promise.all(appointed.map(async(advisor,index)=>({advisor,...await retrieveAdvisor(env.VECTOR_INDEX,vectors[index+1]!,advisor.id,advisor.pack)})));
   const sourceByAdvisor:Record<string,SourceChunk[]>={};for(const item of queried)sourceByAdvisor[item.advisor.id]=await hydrateAdvisorMatches(env,item.matches);
   const base=buildEvidenceBundle(question,history),bundle={...base,sourceByAdvisor};
   return {bundle,retrieval:{provider:'cloudflare-workers-ai-vectorize',model:'@cf/baai/bge-base-en-v1.5',personal:personal.map(({id,score})=>({id,score})),advisor:Object.fromEntries(queried.map(item=>[item.advisor.id,item.matches.map(({id,score})=>({id,score}))]))}};
@@ -90,9 +98,9 @@ async function ingestProductionVectors(env:Bindings){
   return {personal:personal.length,advisor:advisor.length,total:records.length,provider:'cloudflare-workers-ai',model:'@cf/baai/bge-base-en-v1.5',dimensions:768};
 }
 
-async function livePersonalMemory(env:Bindings,query:string){
+async function livePersonalMemory(env:Bindings,query:string,limit:number){
   const embedder=new WorkersAiEmbedder(env.AI),vector=await embedder.embed(query);
-  const matches=(await retrievePersonal(env.VECTOR_INDEX,vector,'demo-user')).matches.slice(0,8);
+  const matches=(await retrievePersonal(env.VECTOR_INDEX,vector,'demo-user',limit)).matches.slice(0,limit);
   if(!matches.length)return {results:[],contentTrust:'untrusted_data',retrievalMode:'workers-ai-bge768'};
   const rows=await env.DB.batch(matches.map(match=>env.DB.prepare("SELECT e.id,e.occurred_at,e.event_type,e.subject_id,e.valence,e.magnitude,e.payload_json,e.provenance FROM vector_records v JOIN events e ON e.id=v.canonical_id WHERE v.id=? AND v.corpus_kind='personal' AND v.user_id='demo-user' AND v.pipeline_hash=? AND e.user_id='demo-user'").bind(match.id,env.PIPELINE_VERSION)));
   const results=rows.flatMap((result,index)=>(result.results as Record<string,unknown>[]).map(row=>({...row,payload_json:undefined,payload:parseStoredJson(row.payload_json),score:matches[index]?.score,untrusted:true})));
@@ -103,7 +111,7 @@ async function route(request:Request,env:Bindings,session:string):Promise<Respon
   const url=new URL(request.url);
   if(url.pathname==='/api/health') return json({status:'ok',runtime:'cloudflare-worker',mode:env.APP_MODE,reasoningMode:env.APP_MODE==='cloudflare'?'deterministic-dual-grounded':env.APP_MODE,modelConfigured:Boolean(env.OPENAI_API_KEY),openaiConfigured:Boolean(env.OPENAI_API_KEY),retrievalMode:env.APP_MODE==='cloudflare'?'workers-ai-vectorize':'deterministic-fixture',...(env.ACCEPTANCE_DIAGNOSTICS==='safe-seed-stage'?{acceptanceInstance:env.ACCEPTANCE_INSTANCE_ID}: {})});
   if(url.pathname==='/api/context') return json(await context(env,session));
-  if(url.pathname==='/api/memory') {const query=(url.searchParams.get('q')??'').toLowerCase().slice(0,300);if(query.length<2)return json({error:'INVALID_MEMORY_QUERY'},400);if(env.APP_MODE==='cloudflare')return json(await livePersonalMemory(env,query));const terms=query.split(/\W+/).filter(x=>x.length>2);const results=buildSyntheticHistory().map(item=>({item,score:terms.filter(term=>`${item.text} ${item.tags.join(' ')}`.toLowerCase().includes(term)).length})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||b.item.occurredAt.localeCompare(a.item.occurredAt)).slice(0,8).map(x=>({...x.item,untrusted:true}));return json({results,contentTrust:'untrusted_data',retrievalMode:'deterministic-fixture'})}
+  if(url.pathname==='/api/memory') {const query=(url.searchParams.get('q')??'').toLowerCase().slice(0,300),rawLimit=Number(url.searchParams.get('limit')??OPERATING_LIMITS.personalTopK),limit=Number.isInteger(rawLimit)?Math.min(OPERATING_LIMITS.personalTopK,Math.max(1,rawLimit)):OPERATING_LIMITS.personalTopK;if(query.length<2)return json({error:'INVALID_MEMORY_QUERY'},400);if(env.APP_MODE==='cloudflare')return json(await livePersonalMemory(env,query,limit));const terms=query.split(/\W+/).filter(x=>x.length>2);const results=buildSyntheticHistory().map(item=>({item,score:terms.filter(term=>`${item.text} ${item.tags.join(' ')}`.toLowerCase().includes(term)).length})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||b.item.occurredAt.localeCompare(a.item.occurredAt)).slice(0,limit).map(x=>({...x.item,untrusted:true}));return json({results,contentTrust:'untrusted_data',retrievalMode:'deterministic-fixture'})}
   if(url.pathname==='/api/patterns'){await ensureSession(env.DB,session);const history=env.APP_MODE==='fixture'?buildSyntheticHistory():await loadCanonicalHistory(env.DB);return json({patterns:inferPatterns(history),canonicalEventCount:history.length})}
   if(url.pathname.startsWith('/api/patterns/')){const history=env.APP_MODE==='fixture'?buildSyntheticHistory():await loadCanonicalHistory(env.DB),found=inferPatterns(history).find(p=>p.id===url.pathname.split('/').at(-1));return found?json(found):json({error:'not found'},404)}
   if(url.pathname==='/api/council'&&request.method==='GET') return json(env.APP_MODE==='fixture'?{appointed:['marcus-aurelius','epictetus','sun-tzu'],sourceChunks:SOURCE_CHUNKS.map(({text,...safe})=>({...safe,excerpt:text}))}:await canonicalCouncil(env,session));

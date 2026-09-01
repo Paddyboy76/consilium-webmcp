@@ -6,7 +6,7 @@ Verified: 2026-09-01 UTC
 
 - Account ID: `9ff4685afd71fb353eb179a43033f1f9` (patadmin OAuth-verified account).
 - Worker: `consilium-webmcp` at `https://consilium-webmcp.patrickhallermann.workers.dev`.
-- Current Worker version: `daca3fa4-a2e7-4dfb-87b1-e588b3f2496d`.
+- Current Worker version: `1cdcd452-4a55-443a-98fa-058ee35260be`.
 - D1: `consilium-webmcp-prod`, ID `c8152314-29a6-49f4-8007-eba51b2a2b9e`, region WEUR.
 - Vectorize: `consilium-evidence-bge768-v2`, 768 dimensions, cosine. Vectorize exposes the name rather than a separate index UUID in Wrangler output.
 - Workers AI embedding model: `@cf/baai/bge-base-en-v1.5`.
@@ -54,8 +54,18 @@ The first live attempt passed real retrieval but correctly abstained because fix
 
 Result: `Cloudflare live acceptance passed: Workers AI + Vectorize + D1; deterministic dual-grounded council; no OpenAI application call.` The two acceptance attempts each made only the intended memory and consultation embedding requests; the repeat was required by the fail-closed calibration repair, not sampling.
 
+## Browser-found contract defects pending rerun
+
+A subsequent WebMCP-capable browser review found two real defects that invalidate any claim of completed browser acceptance for the current release:
+
+1. `search_personal_memory` forwarded `limit=5`, but `/api/memory` ignored it and returned the hard maximum of eight. The route now validates/clamps the requested bound, passes it into Vectorize `topK`, and slices canonical D1 hydration to that same value. The focused regression proves five is honored and an oversized request remains capped at eight.
+2. The exact question `What should I focus on in the next 45 minutes, and why?` produced three apparently grounded reports but an abstained aggregate decision. Trace analysis established that report construction precedes validation: the generic question vector retrieved canonical appointed chunks, but their raw similarity could fall below the preserved advisor-specific floors, so synthesis rejected every report afterward. No evidence ID was fabricated. The repair keeps the floors and metadata filters, batches one personal query plus three bounded advisor-specific semantic queries, then rehydrates every returned ID through `vector_records` into canonical D1 events or active appointed source chunks before synthesis.
+
+The focused integration test now requires the exact browser question to yield three validated, non-abstained reports, personal evidence `evt-64-adapt-success`, and advisor evidence `marcus-b4-03`, `epictetus-ench-01a`, and `suntzu-3-2`. It also proves those IDs exist in canonical D1 and belong to the active appointed packs. Static checks and the 24 focused tests passed. Version `1cdcd452-4a55-443a-98fa-058ee35260be` is deployed for supervisor rerun; the revised bounded journey has not been rerun, and browser/WebMCP acceptance is not claimed.
+
 ## Tested and untested boundaries
 
-- Passed: strict TypeScript/ESLint; 24 focused tests across production orchestration, seed behavior, retrieval filters, longitudinal causality, semantic support, injection resistance, and provider-specific score rejection; production Wrangler dry-run; remote D1/Vectorize/Workers AI journey; final health and asset-label check.
-- Not tested or claimed: OpenAI application reasoning/T3, genuine Agents SDK execution, a WebMCP-capable browser T4 interaction, custom-domain routing, Cloudflare Access, or GitHub publication.
+- Passed: strict TypeScript/ESLint; 24 focused tests across production orchestration, bounded memory retrieval, canonical identity, seed behavior, retrieval filters, longitudinal causality, semantic support, injection resistance, and provider-specific score rejection. The earlier remote D1/Vectorize/Workers AI journey passed its then-current assertions.
+- Pending: supervisor browser/WebMCP rerun and the revised bounded journey against version `1cdcd452-4a55-443a-98fa-058ee35260be`.
+- Not tested or claimed: OpenAI application reasoning/T3, genuine Agents SDK execution, current WebMCP-capable browser T4 acceptance, custom-domain routing, Cloudflare Access, or GitHub publication.
 - Production Free plan rejected custom Wrangler CPU/subrequest `limits` configuration. The production config therefore uses platform Free-plan limits while preserving all application-level caps; local and acceptance configs retain explicit 30,000 ms/40 settings.
