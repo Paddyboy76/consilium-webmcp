@@ -20,6 +20,6 @@ Tests protect material behavior; there is no target count.
 | SDK incompatibility | Worker bundle/import succeeds | Wrangler dry-run + Miniflare import | dependency/runtime change | T0/T1 free | pending |
 | Model regression | Live distinct agents + structured output | fixed OpenAI smoke set | authorized credential + phase boundary | T3 paid | blocked |
 | Browser integration | Real WebMCP journey/state reconciliation | deployed golden journey | each deployed SHA | T4 | blocked |
-| Recovered operating loop | Four-area seed; mission → failure → reflection → brief evidence influence; shared tool audit | Worker/D1 integration + local HTTP marker journey | product/schema change | T1 | recovery build |
+| Consilium operating loop | Exact six-domain seed/migration; mission → failure → reflection → brief evidence influence; shared tool audit | Worker/D1 integration + local HTTP marker journey | product/schema change | T1 | Pass 4 |
 
 Unchanged green suites are not rerun for reassurance. Paid tests require explicit credential authorization.

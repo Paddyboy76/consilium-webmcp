@@ -1,44 +1,74 @@
 import { CAAR_KEYS, selectBriefPriority, validateReflection } from './reflection';
 type ProductBindings={DB:D1Database};
-const DEMO_AREAS=[
-  ['vocation','Vocation','Build work that is useful, ethical, and economically durable.','#f97316'],
-  ['health','Health','Protect energy, strength, and recovery as operating capacity.','#22c55e'],
-  ['relationships','Relationships','Invest attention in the people who make life meaningful.','#a855f7'],
-  ['learning','Learning','Turn study into tested judgment and reusable capability.','#06b6d4']
+export const CONSILIUM_DOMAINS=[
+  ['PHY','Physical','Fuel, movement, and recovery for your body.','#ef6a3a'],
+  ['MNT','Mental','Mental resilience, focus, and emotional regulation.','#d9a441'],
+  ['SPR','Spiritual','Purpose, values, and inner alignment.','#a78bfa'],
+  ['SOC','Social','Relationships, community, and social investment.','#ec7aa5'],
+  ['FIN','Financial','Earning, saving, investing, and financial freedom.','#58a6ff'],
+  ['VOC','Vocational','Career, craft, skills, and professional growth.','#f15023']
 ] as const;
 const DEMO_MISSIONS=[
-  ['pilot','vocation','project','Validate accessibility audit pilot','Prove demand before expanding the studio.','quarterly','active',62,'2026-10-15'],
-  ['outreach','vocation','goal','Send three evidence-led pilot invitations','Direct conversations create better evidence than polishing.','weekly','active',33,'2026-09-06'],
-  ['delivery','vocation','goal','Deliver the Acme accessibility findings','Keep the existing client promise before seeking novelty.','today','active',70,'2026-09-02'],
-  ['strength','health','project','Rebuild durable strength and sleep','Energy is a constraint on every other mission.','quarterly','active',48,'2026-11-30'],
-  ['walk','health','goal','Walk outside after lunch four times','A small recovery cue prevents the afternoon collapse.','weekly','active',50,'2026-09-06'],
-  ['family','relationships','goal','Call Mum without multitasking','Attention is the outcome, not merely making the call.','weekly','active',0,'2026-09-06'],
-  ['writing','learning','project','Publish the field-notes essay series','Writing forces tested learning into a useful form.','yearly','active',28,'2026-12-20'],
-  ['essay','learning','goal','Draft the counterexample section','The argument needs disconfirming evidence, not another summary.','today','active',40,'2026-09-02']
+  ['physical-project','PHY','project','Build a resilient energy baseline','Consistent movement and recovery protect capacity for every other commitment.','quarterly','active',48,'2026-11-30'],
+  ['physical-goal','PHY','goal','Take a recovery walk after lunch','A short outdoor reset tests whether movement restores afternoon attention.','today','active',50,'2026-09-03'],
+  ['mental-project','MNT','project','Strengthen calm, deliberate focus','Attention regulation makes difficult work more sustainable.','quarterly','active',44,'2026-11-30'],
+  ['mental-goal','MNT','goal','Complete one distraction-free focus block','A bounded session creates observable evidence about focus conditions.','today','active',60,'2026-09-03'],
+  ['spiritual-project','SPR','project','Practice values-led weekly review','A regular review keeps choices aligned with stated values.','quarterly','active',35,'2026-11-30'],
+  ['spiritual-goal','SPR','goal','Write the value behind today’s hardest choice','Naming the value turns vague intention into a testable decision guide.','today','active',25,'2026-09-03'],
+  ['social-project','SOC','project','Invest in close relationships','Reliable, undivided attention strengthens the relationships that matter.','quarterly','active',52,'2026-11-30'],
+  ['social-goal','SOC','goal','Call Mum without multitasking','Attention is the outcome, not merely making the call.','today','active',0,'2026-09-03'],
+  ['financial-project','FIN','project','Create a durable monthly buffer','A visible buffer reduces fragility without relying on optimistic forecasts.','quarterly','active',40,'2026-11-30'],
+  ['financial-goal','FIN','goal','Review recurring costs for one useful cut','One evidence-based adjustment is more useful than a vague austerity target.','today','active',30,'2026-09-03'],
+  ['vocational-project','VOC','project','Validate accessibility audit pilot','Prove demand before expanding the studio.','quarterly','active',62,'2026-10-15'],
+  ['vocational-goal','VOC','goal','Send one evidence-led pilot invitation','Direct conversation creates better evidence than polishing.','today','active',33,'2026-09-03']
 ] as const;
+
+const LEGACY_MAPPINGS={health:'PHY',relationships:'SOC',vocation:'VOC'} as const;
+const DOMAIN_BY_CODE=new Map(CONSILIUM_DOMAINS.map(domain=>[domain[0],domain]));
 
 const clean=(value:unknown,max:number)=>typeof value==='string'?value.trim().slice(0,max):'';
 const uuid=(prefix:string)=>`${prefix}-${crypto.randomUUID()}`;
 const payload=(value:unknown)=>JSON.stringify(value);
 
 export async function seedProduct(db:D1Database,session:string){
-  const areaCount=await db.prepare('SELECT COUNT(*) count FROM life_areas WHERE session_id=?').bind(session).first<{count:number}>();
-  if((areaCount?.count??0)>0)return;
-  const areaRows=DEMO_AREAS.map(([slug,name,purpose,accent],position)=>db.prepare('INSERT INTO life_areas(id,session_id,name,purpose,accent,position,created_at) VALUES(?,?,?,?,?,?,?)').bind(`${session}-${slug}`,session,name,purpose,accent,position,'2026-06-01T08:00:00Z'));
-  const missionRows=DEMO_MISSIONS.map(([slug,area,kind,title,why,horizon,status,progress,target])=>db.prepare('INSERT INTO missions(id,session_id,area_id,kind,title,why_text,horizon,status,progress,target_date,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)').bind(`${session}-${slug}`,session,`${session}-${area}`,kind,title,why,horizon,status,progress,target,'2026-06-01T08:00:00Z'));
-  await db.batch([...areaRows,...missionRows]);
-  await db.batch([
-    db.prepare('INSERT INTO progress_logs VALUES(?,?,?,?,?,?,?)').bind(`${session}-log-pilot`,session,`${session}-pilot`,'partial',62,'Two discovery calls confirmed the reporting pain; one buyer would not pay without a sample.','2026-08-27T16:30:00Z'),
-    db.prepare('INSERT INTO progress_logs VALUES(?,?,?,?,?,?,?)').bind(`${session}-log-delivery`,session,`${session}-delivery`,'progress',70,'Keyboard and contrast review complete; screen-reader findings still need evidence.','2026-09-01T15:20:00Z'),
-    db.prepare('INSERT INTO progress_logs VALUES(?,?,?,?,?,?,?)').bind(`${session}-log-failure`,session,`${session}-outreach`,'failure',33,'Used the protected block to redesign the landing page; sent no invitation.','2026-08-31T10:10:00Z'),
-    db.prepare('INSERT INTO progress_logs VALUES(?,?,?,?,?,?,?)').bind(`${session}-log-walk`,session,`${session}-walk`,'success',50,'Two lunch walks reduced the usual 15:00 energy dip.','2026-09-01T13:15:00Z'),
-    db.prepare('INSERT INTO reflections VALUES(?,?,?,?,?,?,?,?,?,?,?)').bind(`${session}-reflection-seed`,session,`${session}-outreach`,'Completed the client audit evidence pass.','Avoided pilot outreach despite reserving the hour.','Opened the design file and refined presentation details instead of sending the prepared message.','The send created exposure to rejection; polishing felt productive and controllable.','Protected time is insufficient when the first action remains ambiguous or emotionally costly.','Open the contact list the night before and send one plain invitation before opening design tools.','Send one invitation at 09:00, then finish the client screen-reader findings.','2026-09-01T20:40:00Z')
-  ]);
+  const existing=await db.prepare('SELECT id,name,code FROM life_areas WHERE session_id=? ORDER BY position').bind(session).all<{id:string;name:string;code:string|null}>();
+  const byCode=new Map(existing.results.filter(area=>area.code).map(area=>[area.code!,area]));
+  for(const area of existing.results){
+    const legacyCode=LEGACY_MAPPINGS[area.id.slice(session.length+1) as keyof typeof LEGACY_MAPPINGS];
+    if(!area.code&&legacyCode&&!byCode.has(legacyCode)){
+      const canonical=DOMAIN_BY_CODE.get(legacyCode)!;
+      await db.prepare('UPDATE life_areas SET code=?,name=?,purpose=?,accent=?,position=?,is_active=1,migration_json=? WHERE id=? AND session_id=?').bind(legacyCode,canonical[1],canonical[2],canonical[3],CONSILIUM_DOMAINS.findIndex(item=>item[0]===legacyCode),JSON.stringify({pass:4,from:area.name,to:canonical[1],reason:'semantically_defensible_legacy_mapping'}),area.id,session).run();
+      byCode.set(legacyCode,{...area,code:legacyCode,name:canonical[1]});
+    }
+  }
+  const legacyLearning=existing.results.find(area=>!area.code&&area.id===`${session}-learning`);
+  if(legacyLearning){
+    const vocational=byCode.get('VOC');
+    if(vocational)await db.prepare('UPDATE missions SET area_id=? WHERE session_id=? AND area_id=?').bind(vocational.id,session,legacyLearning.id).run();
+    await db.prepare('UPDATE life_areas SET is_active=0,migration_json=? WHERE id=? AND session_id=?').bind(JSON.stringify({pass:4,from:'Learning',to:'VOC',reason:'seeded writing and essay work is vocational; records retained and mission links preserved'}),legacyLearning.id,session).run();
+  }
+  for(const [position,domain] of CONSILIUM_DOMAINS.entries())if(!byCode.has(domain[0])){
+    const [code,name,purpose,accent]=domain,id=`${session}-${code}`;
+    await db.prepare('INSERT OR IGNORE INTO life_areas(id,session_id,name,purpose,accent,position,created_at,code,is_active,migration_json) VALUES(?,?,?,?,?,?,?, ?,1,?)').bind(id,session,name,purpose,accent,position,'2026-06-01T08:00:00Z',code,JSON.stringify({pass:4,origin:'canonical_consilium_domain'})).run();
+    byCode.set(code,{id,name,code});
+  }
+  const missionRows=DEMO_MISSIONS.map(([slug,code,kind,title,why,horizon,status,progress,target])=>db.prepare('INSERT OR IGNORE INTO missions(id,session_id,area_id,kind,title,why_text,horizon,status,progress,target_date,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)').bind(`${session}-${slug}`,session,byCode.get(code)!.id,kind,title,why,horizon,status,progress,target,'2026-06-01T08:00:00Z'));
+  await db.batch(missionRows);
+  const signals=[
+    ['PHY','success',50,'The lunch walk restored enough energy to finish the afternoon review.'],['MNT','progress',60,'A notification-free block produced forty focused minutes.'],['SPR','partial',25,'The value was named, but only after the decision had already been made.'],['SOC','failure',0,'The call was postponed when work expanded into the evening.'],['FIN','progress',30,'Two unused subscriptions were identified; cancellation is still pending.'],['VOC','failure',33,'The protected block went to polishing instead of sending the invitation.']
+  ] as const;
+  await db.batch(signals.flatMap(([code,result,progress,note],index)=>{
+    const slug=DOMAIN_BY_CODE.get(code)![1].toLowerCase(),goal=`${session}-${slug}-goal`,reflection=`${session}-${slug}-reflection`,at=`2026-09-0${index<3?1:2}T${12+index}:10:00Z`;
+    return [
+      db.prepare('INSERT OR IGNORE INTO progress_logs VALUES(?,?,?,?,?,?,?)').bind(`${session}-${slug}-progress`,session,goal,result,progress,note,at),
+      db.prepare('INSERT OR IGNORE INTO reflections VALUES(?,?,?,?,?,?,?,?,?,?,?)').bind(reflection,session,goal,`Made observable progress in ${slug} practice.`,result==='failure'?'The intended action did not happen.':'The full intended outcome was not yet complete.',note,result==='failure'?'Avoidance or competing work displaced the explicit cue.':'The first step worked, but the completion cue needs to be clearer.','Small actions produced more useful evidence than general intention.',`Put the smallest ${slug} action on the calendar with a visible trigger.`,`Run the adjusted ${slug} action before adding scope.`,at)
+    ];
+  }));
 }
 
 async function productState(db:D1Database,session:string){
   const [areas,missions,logs,reflections,structuredReflections,goalReflections,directives,briefs,calls]=await db.batch([
-    db.prepare('SELECT * FROM life_areas WHERE session_id=? ORDER BY position').bind(session),
+    db.prepare('SELECT * FROM life_areas WHERE session_id=? AND is_active=1 ORDER BY position').bind(session),
     db.prepare('SELECT * FROM missions WHERE session_id=? ORDER BY CASE horizon WHEN \'today\' THEN 0 WHEN \'weekly\' THEN 1 WHEN \'quarterly\' THEN 2 ELSE 3 END, created_at').bind(session),
     db.prepare('SELECT p.*,m.title mission_title,a.name area_name FROM progress_logs p JOIN missions m ON m.id=p.mission_id JOIN life_areas a ON a.id=m.area_id WHERE p.session_id=? ORDER BY occurred_at DESC LIMIT 30').bind(session),
     db.prepare('SELECT r.*,m.title mission_title,a.name area_name FROM reflections r LEFT JOIN missions m ON m.id=r.mission_id LEFT JOIN life_areas a ON a.id=m.area_id WHERE r.session_id=? ORDER BY occurred_at DESC LIMIT 20').bind(session),

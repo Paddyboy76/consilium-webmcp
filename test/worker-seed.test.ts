@@ -26,14 +26,14 @@ class VectorizeFixture {
 }
 
 const baseEnv=(database:DatabaseSync)=>({DB:new SqliteD1(database),MODEL_CONFIG_VERSION:'council-v1',PIPELINE_VERSION:'1f5efdc1c1ef895b221f8dba3ab9c6b64139eb4265eb33a154ba560aa761109f',CONSULTATION_LIMIT_PER_HOUR:'6',SESSION_KEY_VERSION:'k1',SESSION_SIGNING_KEY:'test-only-signing-secret-at-least-32-bytes',ASSETS:{fetch:()=>Promise.resolve(new Response('asset'))}});
-const migratedDatabase=()=>{const database=new DatabaseSync(':memory:');for(const file of ['0001_initial.sql','0002_hardening.sql','0003_recovery_product.sql','0004_structured_reflection.sql'])database.exec(readFileSync(`migrations/${file}`,'utf8'));return database};
+const migratedDatabase=()=>{const database=new DatabaseSync(':memory:');for(const file of ['0001_initial.sql','0002_hardening.sql','0003_recovery_product.sql','0004_structured_reflection.sql','0005_exact_life_domains.sql'])database.exec(readFileSync(`migrations/${file}`,'utf8'));return database};
 const reflectionInput=(todayIds:string[],marker='outreach')=>({journal:`A deliberately specific ${marker} journal records the operational and emotional tone of this day.`,biometrics:{sleep_hours:6.5,energy_level:6,stress_level:7,resting_hr:61},caar:{q1_today_intent:`Completed measurable ${marker} progress on the primary deliverable.`,q2_top_win:`The main ${marker} friction was avoidance; Version 2 starts with the exposed task.`,q3_top_failure:`Focus was strongest in the quiet morning environment before messages arrived.`,q4_pattern_notice:`Preparation worked because I opened the evidence checklist before other tools.`,q5_tomorrow_priority:`I polished presentation details instead of testing the most uncertain outcome.`,q6_if_then_plan:`Tomorrow ${marker} is first; if avoidance appears, then send one plain test before polishing.`},goal_reflections:todayIds.map((goal_id,index)=>({goal_id,status:index===0?'missed':'achieved',...(index===0?{why_failed:`I avoided the exposed ${marker} action and chose comfortable polishing instead.`,adaptation:`Open the ${marker} target first and complete one plain attempt before any polishing.`}:{})}))});
 
 describe('first-request D1 seed',()=>{
   it('persists the recovered mission → failure → reflection → brief loop on one session',async()=>{
     const database=migratedDatabase(),env={...baseEnv(database),APP_MODE:'fixture'};
     const initial=await worker.fetch(new Request('https://fixture.test/api/product'),env as never),cookie=initial.headers.get('set-cookie')?.split(';')[0],product=await initial.json<{areas:{id:string}[];missions:unknown[]}>();
-    expect({status:initial.status,areas:product.areas.length,missions:product.missions.length}).toEqual({status:200,areas:4,missions:8});
+    expect({status:initial.status,areas:product.areas.length,missions:product.missions.length}).toEqual({status:200,areas:6,missions:12});
     const call=async(path:string,input:unknown)=>worker.fetch(new Request(`https://fixture.test${path}`,{method:'POST',headers:{cookie:cookie!,'content-type':'application/json'},body:JSON.stringify(input)}),env as never);
     const created=await call('/api/missions',{kind:'goal',areaId:product.areas[0]!.id,horizon:'today',title:'Unique recovery goal',why:'Prove linked history'}),mission=await created.json<{id:string}>();
     expect(created.status).toBe(201);
