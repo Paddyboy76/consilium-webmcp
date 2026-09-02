@@ -1,6 +1,41 @@
-# Recovery status — Pass 9 release gate
+# Recovery status — Pass 10 adversarial council release audit
 
 Updated: 2026-09-02 UTC
+
+## Pass 10 result
+
+- Audited Pass 8/9 directly and reproduced all ten reported weaknesses. Repaired mechanically identical advisor memory lanes with a canonical shared situation set plus scope-ranked Marcus, Epictetus, and Sun Tzu lanes. Exact family and vocational ID-set tests prove question sensitivity, legitimate overlap, distinct sets, and exclusion of pilot evidence from the family consultation.
+- Replaced bare `P1`/`S1` references with server-issued advisor-qualified slots such as `marcus-aurelius:P1` and `sun-tzu:S1`. Hydration now rejects bare, unknown, and cross-lane references and maps every accepted reference to one canonical record.
+- Replaced pilot-hardcoded fallback advice with question-sensitive, source-grounded family and vocational reports. The family fallback keeps Sun Tzu strictly on workload/timing/capacity and explicitly outside emotional or medical counsel.
+- Replaced recommendation concatenation with deterministic council synthesis that integrates duty, agency, conditions, the central conflict, disagreement, evidence, and limitations. The three-report adversarial test proves the result differs from every report and from their concatenation.
+- Moved report validation ahead of decision acceptance and persistence. Invalid generated scope/evidence output is discarded, the labelled validated deterministic fallback is revalidated, and stored report validity, returned validity, decision, and persisted recommendation now agree. The adversarial Workers AI fixture proves invalid Sun Tzu counsel cannot reach the response or database.
+- Split Vectorize `candidates` from authoritative `selected` supplied evidence. Selected personal/source IDs are the exact server-owned slot inventory; set assertions prove every later citation belongs to the corresponding selected advisor lane.
+- Removed Pass 9’s runtime vocabulary regex gate. Reflection input retains meaningful length/shape checks and structural goal status, failure reason, and adaptation requirements. Natural paraphrases without “win”, “despite”, “pattern”, “but”, “tomorrow”, “if”, or “then” are accepted. The known swapped legacy fixture remains narrowly corrected and covered by seed-integrity tests.
+- Proved all six CAAR meanings end to end: submitted JSON equals stored `caar_json`; `reflection_facts` map in order to progress, success, friction, misalignment, mission, and adaptation; and the brief exposes the intent/outcome, win/friction, failure/mechanism, pattern/counterevidence, priority, and if-then sections without swapping them.
+- Browser fixture passed with the serious consultation presenting remembered facts, tentative understanding, unknowns, and rejected inference before advice. All 13 WebMCP contracts and explicit proposal → unchanged state → commit → replay rejection remain intact. Five fixture screenshots were refreshed under `artifacts/pass9`; desktop/mobile widths were exact, reflection and brief returned 201, and replay returned 409.
+- No live AI call, Cloudflare mutation, Debian deployment, or UI redesign occurred.
+
+## Pass 10 verification
+
+- Focused adversarial suite: included in the full 16-file suite; 77 tests pass after the final source changes.
+- `npm run check`: pass after the final change.
+- `npm test`: 16 files, 77 tests pass after the final change.
+- `npm run deploy:check`: production bundle dry-run passes; no deployment occurs.
+- Local browser acceptance: 5 screenshots, no console/page errors, desktop `1440/1440`, mobile `390/390`, reflection `201`, brief `201`, commit replay `409`.
+
+## Migration, reindex, and Windows OAuth handoff
+
+No D1 migration is required. No Vectorize reindex is required: this pass changes post-retrieval selection, slot ownership, validation, fallback reasoning, and stored brief analysis, not canonical vector content or embedding configuration. The pipeline hash remains `0f7f47a4116e02d59f2622824e4535cda5c92ffa2eb0648deda04bd72309bed5`.
+
+From Windows PowerShell with OAuth:
+
+```powershell
+npx wrangler login
+npx wrangler d1 migrations apply consilium-webmcp-production --config wrangler.production.jsonc --remote
+npm run deploy:production
+```
+
+Do not deploy from Debian. The migration command should report no pending migration; it remains in the handoff as a pre-deploy verification step. Run a live council proof only with explicit authorization because it invokes Workers AI and production retrieval.
 
 ## Pass 9 result
 

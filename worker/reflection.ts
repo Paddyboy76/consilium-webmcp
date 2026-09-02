@@ -4,20 +4,6 @@ export type GoalReflectionInput={goal_id:string;status:'achieved'|'missed'|'not_
 export type ReflectionInput={journal:string;biometrics:{sleep_hours:number;energy_level:number;stress_level:number;resting_hr?:number|null};caar:Record<CaarKey,string>;goal_reflections:GoalReflectionInput[]};
 
 const meaningful=(value:unknown,min:number,max=2000)=>typeof value==='string'&&value.trim().length>=min&&value.trim().length<=max;
-const semanticSignals:Record<CaarKey,{required:RegExp[];forbidden?:RegExp[]}>= {
-  q1_today_intent:{required:[/\b(intend|planned|meant|wanted|set out|today)\b/i,/\b(did|finished|completed|happened|instead|but)\b/i]},
-  q2_top_win:{required:[/\b(win|managed|finished|completed|did|worked|helped)\b/i,/\b(despite|even though|friction|resist|hard|difficult|phone|fear|tired|scattered)\b/i]},
-  q3_top_failure:{required:[/\b(did not|didn't|missed|failed|avoided|left|instead|put off)\b/i,/\b(because|when|so|fear|nervous|overwhelm|safer|tired)\b/i],forbidden:[/\b(?:I am|I'm) (?:lazy|useless|pathetic|a failure|stupid)\b/i]},
-  q4_pattern_notice:{required:[/\b(may|might|seem|notice|appears|sometimes|becoming|pattern)\b/i,/\b(but|although|however|except|when|also|counter)\b/i]},
-  q5_tomorrow_priority:{required:[/\b(tomorrow|priority|first|most important|one thing)\b/i]},
-  q6_if_then_plan:{required:[/\bif\b/i,/\bthen|will\b/i]}
-};
-
-export function validateCaarSemantics(answers:Record<string,unknown>){
-  const errors:Record<string,string>={};
-  for(const key of CAAR_KEYS){const text=typeof answers[key]==='string'?answers[key]:'';const rule=semanticSignals[key];if(rule.required.some(signal=>!signal.test(text))||rule.forbidden?.some(signal=>signal.test(text)))errors[`caar.${key}`]=`Answer does not match the meaning of ${key}.`;}
-  return errors;
-}
 export function validateReflection(value:Record<string,unknown>):{ok:true;value:ReflectionInput}|{ok:false;fieldErrors:Record<string,string>} {
   const errors:Record<string,string>={},journal=value.journal,biometrics=value.biometrics,caar=value.caar,goals=value.goal_reflections;
   if(!meaningful(journal,40,4000))errors.journal='Daily anchor journal must contain at least 40 meaningful characters.';
@@ -30,7 +16,6 @@ export function validateReflection(value:Record<string,unknown>):{ok:true;value:
   if(!caar||typeof caar!=='object'||Array.isArray(caar))errors.caar='All six CAAR answers are required.';
   const answers=(caar??{}) as Record<string,unknown>;
   for(const key of CAAR_KEYS)if(!meaningful(answers[key],15,2000))errors[`caar.${key}`]='Answer must contain at least 15 meaningful characters.';
-  if(caar&&typeof caar==='object'&&!Array.isArray(caar))Object.assign(errors,validateCaarSemantics(answers));
   if(!Array.isArray(goals)||goals.length<1)errors.goal_reflections='At least one active Today goal must be explicitly reviewed.';
   const seen=new Set<string>();
   if(Array.isArray(goals))goals.forEach((raw,index)=>{
