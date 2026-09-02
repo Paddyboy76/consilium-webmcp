@@ -45,7 +45,7 @@ describe('Pass 7 natural demo content',()=>{
 
   it('explains dashboard counts and council members instead of showing unexplained metrics',()=>{
     const script=readFileSync('web/app.js','utf8');
-    for(const phrase of ['six goals for today and six longer-term projects','6 RECENT UPDATES','YOUR COUNCIL FOR THIS DEMO','Marcus Aurelius','Epictetus','Sun Tzu'])expect(script).toContain(phrase);
+    for(const phrase of ['This demo contains ${today.length} goals for today and ${projects.length} longer-term projects','6 RECENT UPDATES','YOUR COUNCIL FOR THIS DEMO','Marcus Aurelius','Epictetus','Sun Tzu'])expect(script).toContain(phrase);
     for(const phrase of ['ACTIVE MISSIONS','PROGRESS SIGNALS','APPOINTED ADVISORS'])expect(script).not.toContain(phrase);
   });
 });
