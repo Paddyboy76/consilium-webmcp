@@ -1,0 +1,24 @@
+import { chromium } from 'playwright';
+
+const base=process.env.CONSILIUM_CAPTURE_URL??'http://127.0.0.1:8790';
+const marker=`PASS3-HUMAN-${Date.now()}`;
+const browser=await chromium.launch({headless:true});
+const page=await browser.newPage({viewport:{width:1440,height:900}});
+await page.goto(`${base}/#journal`,{waitUntil:'networkidle'});
+await page.evaluate(()=>fetch('/api/reset',{method:'POST',headers:{'content-type':'application/json'},body:'{}'}));
+await page.reload({waitUntil:'networkidle'});
+await page.locator('[data-dialog="reflection-dialog"]').click();
+await page.locator('[name="journal"]').fill(`${marker} recorded a complete emotional and operational account with enough meaningful detail.`);
+for(const [index,key] of ['q1_today_intent','q2_top_win','q3_top_failure','q4_pattern_notice','q5_tomorrow_priority','q6_if_then_plan'].entries())await page.locator(`[name="${key}"]`).fill(`${marker} answer ${index+1} provides specific evidence and an actionable tomorrow hypothesis.`);
+const goals=page.locator('.goal-reflection');
+for(let index=0;index<await goals.count();index++)await goals.nth(index).locator(`input[value="${index===0?'missed':'achieved'}"]`).check();
+const first=goals.first();await first.locator('[name^="why_failed-"]').fill(`${marker} I opened comfortable tools instead of completing the exposed first action.`);await first.locator('[name^="adaptation-"]').fill(`${marker} open the evidence target first and finish one plain attempt before polishing.`);
+await page.locator('#reflection-form > .primary').click();await page.locator('#reflection-synthesis .synthesis').waitFor();
+const accepted=await page.evaluate(()=>fetch('/api/product').then(response=>response.json()));
+if(!accepted.nightlyReflections[0]?.journal.includes(marker)||accepted.goalReflections.length<2)throw new Error('Structured reflection did not persist through the human form.');
+await page.locator('#reflection-dialog header button').click();await page.goto(`${base}/#brief`);await page.locator('#generate-brief').click();await page.locator('#brief-content').getByText(marker,{exact:false}).first().waitFor();
+await page.goto(`${base}/#council`);await page.locator('#consult-form button').click();await page.locator('#propose').waitFor();await page.locator('#propose').click();await page.locator('#commit-action').waitFor();const staged=await page.evaluate(()=>fetch('/api/context').then(response=>response.json()));if(staged.actions.length!==0)throw new Error('Proposal mutated state before approval.');
+await page.locator('#commit-action').click();await page.waitForTimeout(150);const replay=await page.evaluate(async id=>(await fetch('/api/actions/commit',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({proposal_id:id})})).status,staged.pendingProposal.id);if(replay!==409)throw new Error(`Replay returned ${replay}`);
+await page.goto(`${base}/#trace`);const trace=await page.locator('#view-trace').textContent();if(!trace?.includes('record_evening_reflection'))throw new Error('Transparency does not expose the reflection tool call.');
+await browser.close();
+console.log(JSON.stringify({marker,reflectionFields:10,goalReviews:accepted.goalReflections.length,briefChanged:true,council:true,proposalNonMutating:true,commit:true,replayStatus:replay,transparency:true}));

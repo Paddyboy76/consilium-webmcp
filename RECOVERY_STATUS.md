@@ -14,12 +14,22 @@ Updated: 2026-09-02 UTC
 - Direct Brain2 reuse/adaptation is mapped in `docs/BRAIN2_REUSE_MAP.md`, including exact original paths, API adapters, and omissions.
 - The shell uses Brain2's Sovereign identity and exact core mono/black/graphite/orange design language.
 - Complete navigation: Today; areas/projects/goals; progress/patterns; morning brief; journal/reflection; council; library/advisors; transparency/analytics.
-- D1-backed demo functions: mission creation, progress/outcomes, CAAR reflection, history-influenced brief, appointments, consultations/traces/recommendations, proposal, atomic commit, replay rejection, and audit.
+- D1-backed demo functions: mission creation; progress/outcomes; the original structured nightly reflection contract; linked facts, goal reviews, adaptations and directives; evidence-selected morning brief; appointments; consultations/traces/recommendations; proposal; atomic commit; replay rejection; and full recent-call audit.
 - Approved plan changes visibly appear in Today, Missions, and Morning Brief. Pending proposals are separately labelled as application-unchanged.
 
 ## WebMCP and council
 
-- 12 always-visible typed tool contracts: four state/evidence reads, four persisted planning/reflection workflows, trace-only consultation and inspection, proposal staging, and approval-gated commit.
+- 12 always-visible typed tool contracts. `record_evening_reflection` exposes the same complete nested schema and validation as the human form; recent-call Transparency displays its submitted fields, returned IDs/counts, and resulting state.
+
+## Pass 3 local acceptance checkpoint
+
+- Additive migration: `migrations/0004_structured_reflection.sql`; no prior audit/history table is discarded.
+- Focused proof: `test/worker-seed.test.ts` varies valid reflections and verifies changed selected goal/evidence; a new missed-goal adaptation changes the next brief without asserting wording equality.
+- Browser scripts: `scripts/golden-pass3.mjs` and `scripts/capture-pass3.mjs`; screenshots live under `artifacts/pass3/` after execution.
+- Local human-browser proof completed with unique marker `PASS3-HUMAN-1788358593439`: all 10 journal/readiness/CAAR fields plus two Today goal reviews, missed-goal details, accepted synthesis, regenerated brief, council, trace, non-mutating proposal, commit, and 409 replay. Capture reported zero page errors and no horizontal overflow.
+- Captures: `reflection-desktop-1440x900.png`, `reflection-mobile-390x844.png`, `morning-brief-1440x900.png`, `transparency-1440x900.png`, plus `enso-stage-1.png` and `enso-stage-2.png` as the named-stage frame sequence.
+- Live Worker remains unchanged. Deployment checkpoint remains migration first, then production dry-run/deploy only after Wrangler OAuth is restored; no API-token workaround was used.
+- Final local gate: `npm run check` passed; all 57 tests passed across 11 files; `wrangler deploy --dry-run --config wrangler.production.jsonc` completed against the production binding manifest without deployment. No live Workers AI calls were made.
 - Ordinary browsers say “browser agent discovery unavailable” without suggesting the implementation is absent. The catalogue, read/write class, matching UI, and last tool call/result remain visible.
 - Production council model/config: `@cf/meta/llama-3.1-8b-instruct-fast`, `workers-ai-json-council-v2`, one non-streaming `response_format.type=json_schema` call for three advisors plus synthesis.
 - Only canonical retrieved personal items and appointed source passages enter the prompt. Server hydration rejects malformed output, the wrong advisor set, unknown personal IDs, and cross-advisor/unknown source IDs. Every report exposes reasoning, recommendation, uncertainty, confidence rationale, disagreement, both citation lanes, and counterevidence.

@@ -26,7 +26,8 @@ class VectorizeFixture {
 }
 
 const baseEnv=(database:DatabaseSync)=>({DB:new SqliteD1(database),MODEL_CONFIG_VERSION:'council-v1',PIPELINE_VERSION:'1f5efdc1c1ef895b221f8dba3ab9c6b64139eb4265eb33a154ba560aa761109f',CONSULTATION_LIMIT_PER_HOUR:'6',SESSION_KEY_VERSION:'k1',SESSION_SIGNING_KEY:'test-only-signing-secret-at-least-32-bytes',ASSETS:{fetch:()=>Promise.resolve(new Response('asset'))}});
-const migratedDatabase=()=>{const database=new DatabaseSync(':memory:');database.exec(readFileSync('migrations/0001_initial.sql','utf8'));database.exec(readFileSync('migrations/0002_hardening.sql','utf8'));database.exec(readFileSync('migrations/0003_recovery_product.sql','utf8'));return database};
+const migratedDatabase=()=>{const database=new DatabaseSync(':memory:');for(const file of ['0001_initial.sql','0002_hardening.sql','0003_recovery_product.sql','0004_structured_reflection.sql'])database.exec(readFileSync(`migrations/${file}`,'utf8'));return database};
+const reflectionInput=(todayIds:string[],marker='outreach')=>({journal:`A deliberately specific ${marker} journal records the operational and emotional tone of this day.`,biometrics:{sleep_hours:6.5,energy_level:6,stress_level:7,resting_hr:61},caar:{q1_today_intent:`Completed measurable ${marker} progress on the primary deliverable.`,q2_top_win:`The main ${marker} friction was avoidance; Version 2 starts with the exposed task.`,q3_top_failure:`Focus was strongest in the quiet morning environment before messages arrived.`,q4_pattern_notice:`Preparation worked because I opened the evidence checklist before other tools.`,q5_tomorrow_priority:`I polished presentation details instead of testing the most uncertain outcome.`,q6_if_then_plan:`Tomorrow ${marker} is first; if avoidance appears, then send one plain test before polishing.`},goal_reflections:todayIds.map((goal_id,index)=>({goal_id,status:index===0?'missed':'achieved',...(index===0?{why_failed:`I avoided the exposed ${marker} action and chose comfortable polishing instead.`,adaptation:`Open the ${marker} target first and complete one plain attempt before any polishing.`}:{})}))});
 
 describe('first-request D1 seed',()=>{
   it('persists the recovered mission → failure → reflection → brief loop on one session',async()=>{
@@ -37,11 +38,23 @@ describe('first-request D1 seed',()=>{
     const created=await call('/api/missions',{kind:'goal',areaId:product.areas[0]!.id,horizon:'today',title:'Unique recovery goal',why:'Prove linked history'}),mission=await created.json<{id:string}>();
     expect(created.status).toBe(201);
     expect((await call('/api/progress',{missionId:mission.id,result:'failure',progress:10,note:'The first attempt failed'})).status).toBe(201);
-    const reflected=await call('/api/reflections',{missionId:mission.id,achieved:'Created the goal',failed:'Missed the test',happened:'Polished instead',why:'Avoided exposure',lesson:'Test first',adaptation:'Send before polishing',tomorrow:'Open the contact list first'}),reflection=await reflected.json<{id:string}>();
+    const refreshed=await (await worker.fetch(new Request('https://fixture.test/api/product',{headers:{cookie:cookie!}}),env as never)).json<{missions:{id:string;horizon:string;status:string}[]}>(),todayIds=refreshed.missions.filter(item=>item.horizon==='today'&&item.status==='active').map(item=>item.id);
+    const reflected=await call('/api/reflections',reflectionInput(todayIds,'contact-list')),reflection=await reflected.json<{id:string}>();
     expect(reflected.status).toBe(201);
     const briefResponse=await call('/api/briefs/generate',{}),brief=await briefResponse.json<{priorities:{why:string;evidenceIds:string[]}[]}>();
-    expect(brief.priorities[0]?.why).toContain('Open the contact list first');expect(brief.priorities[0]?.evidenceIds).toEqual([reflection.id]);
+    expect(brief.priorities[0]?.why).toContain('Open the contact-list target first');expect(brief.priorities[0]?.evidenceIds).toContain(reflection.id);
     expect(database.prepare("SELECT COUNT(*) count FROM webmcp_calls WHERE session_id=(SELECT session_id FROM missions WHERE id=?)").get(mission.id)?.count).toBe(4);
+  });
+  it('changes selected evidence and priorities for different reflections, including a new missed-goal adaptation',async()=>{
+    const database=migratedDatabase(),env={...baseEnv(database),APP_MODE:'fixture'},initial=await worker.fetch(new Request('https://fixture.test/api/product'),env as never),cookie=initial.headers.get('set-cookie')?.split(';')[0],product=await initial.json<{missions:{id:string;horizon:string;status:string}[]}>(),today=product.missions.filter(item=>item.horizon==='today'&&item.status==='active').map(item=>item.id),call=(path:string,input:unknown)=>worker.fetch(new Request(`https://fixture.test${path}`,{method:'POST',headers:{cookie:cookie!,'content-type':'application/json'},body:JSON.stringify(input)}),env as never);
+    const firstReflection=await call('/api/reflections',reflectionInput(today,'delivery')),first=await firstReflection.json<{id:string}>(),firstBrief=await (await call('/api/briefs/generate',{})).json<{priorities:{missionId:string;why:string;evidenceIds:string[]}[]}>();
+    const secondInput=reflectionInput(today,'counterexample');secondInput.goal_reflections=secondInput.goal_reflections.map((item,index)=>index===0?{...item,status:'achieved' as const,why_failed:undefined,adaptation:undefined}:{...item,status:'missed' as const,why_failed:'I deferred the counterexample draft until the remaining time was too fragmented.',adaptation:'Draft the counterexample claim in the first focus block before reading more sources.'});
+    const secondReflection=await call('/api/reflections',secondInput),second=await secondReflection.json<{id:string}>(),secondBrief=await (await call('/api/briefs/generate',{})).json<{priorities:{missionId:string;why:string;evidenceIds:string[]}[]}>();
+    expect(first.id).not.toBe(second.id);expect(firstBrief.priorities[0]?.missionId).not.toBe(secondBrief.priorities[0]?.missionId);expect(firstBrief.priorities[0]?.evidenceIds).toContain(first.id);expect(secondBrief.priorities[0]?.evidenceIds).toContain(second.id);expect(secondBrief.priorities[0]?.why).toContain('Draft the counterexample claim');
+  });
+  it('returns useful field errors and rejects incomplete structured reflections',async()=>{
+    const database=migratedDatabase(),env={...baseEnv(database),APP_MODE:'fixture'},response=await worker.fetch(new Request('https://fixture.test/api/reflections',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({journal:'short'})}),env as never),body=await response.json<{fieldErrors:Record<string,string>}>();
+    expect(response.status).toBe(400);expect(body.fieldErrors.journal).toContain('40');expect(body.fieldErrors['caar.q1_today_intent']).toContain('15');expect(body.fieldErrors.goal_reflections).toBeTruthy();
   });
   it('seeds a fresh migrated database and returns context',async()=>{
     const database=migratedDatabase();

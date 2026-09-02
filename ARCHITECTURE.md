@@ -4,7 +4,9 @@
 
 The recovered shell is a zero-build responsive frontend served by Worker Assets. It adapts Brain2’s dense dark monospaced navigation, domain grouping, mission focus/progress interaction, CAAR reflection vocabulary, morning-brief hierarchy, council/library, and transparency architecture. A thin browser client calls the same Worker routes exposed through WebMCP.
 
-Migration `0003_recovery_product.sql` adds session-scoped `life_areas`, `missions`, `progress_logs`, `reflections`, `morning_briefs`, and `webmcp_calls`. Consequential council actions continue through the pre-existing `proposals` → atomic `actions` boundary. D1 remains canonical; no browser-only state represents a committed fact.
+Migration `0003_recovery_product.sql` adds session-scoped product state. Additive migration `0004_structured_reflection.sql` adds accepted nightly reflections, relational goal reviews, extracted facts, tomorrow directives, and the morning-brief analysis/recommendation link without dropping legacy reflection, audit, or history records. Consequential council actions continue through the pre-existing `proposals` → atomic `actions` boundary. D1 remains canonical; no browser-only state represents a committed fact.
+
+The human reflection modal and WebMCP `record_evening_reflection` call the same `POST /api/reflections` endpoint and server validator. The endpoint verifies exact CAAR keys, readiness ranges, journal/answer lengths, session ownership, completeness over all active Today goals, and missed-goal details before a batch write. Morning-brief selection consumes those records plus active missions, progress logs, earlier recommendations, and counterevidence; displayed IDs are hydrated canonical IDs, and the deterministic fallback avoids causal claims.
 
 The morning brief is deterministic and inspectable: it selects active missions, then explicitly lets the newest reflection’s adaptation and tomorrow implication change the first priority rationale. It stores both the priority JSON and exact evidence IDs.
 
