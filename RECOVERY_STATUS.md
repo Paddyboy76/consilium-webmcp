@@ -5,8 +5,8 @@ Updated: 2026-09-02 UTC
 ## Identity and release
 
 - Pass 2 starting SHA: `eb55fb6f468f590f2b37113785a602eca1b862ed` (clean and pushed).
-- Final SHA: recorded after the final gate and commit.
-- Origin parity: recorded after push.
+- Pass 2 implementation/evidence SHA: `fcd78e889bdca93748977ddf27e09b675167b3c6`; this status-only closure follows it.
+- Origin parity: both implementation and status closure are pushed to `origin/main` (verify final closure SHA with `git rev-parse HEAD`).
 - Live Worker: intentionally unchanged during local work.
 
 ## Recognizable Consilium breadth
