@@ -5,8 +5,8 @@ Updated: 2026-09-02 UTC
 ## Identity
 
 - Starting SHA: `d971e6b1a0a2d512aac863dd2a9c77044efb8a75`
-- Final SHA: pending final commit
-- Branch / remote parity: pending final push
+- Recovery implementation SHA: `2e5035f5dbcc2420b6f981ca5a69495830560e5c`
+- Branch / remote parity: implementation SHA pushed to `origin/main`; this status-only closure follows it.
 - Deployment URL/version: pending gated deployment
 
 ## Shipped feature map
