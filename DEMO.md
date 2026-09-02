@@ -1,11 +1,13 @@
-# 90-second recovery demo
+# WebMCP golden demonstration
 
-1. **Today (0:00–0:12):** “This is a clearly synthetic Consilium workspace: four life areas, eight missions across horizons, recent outcomes, and the last learned adaptation.”
-2. **Missions (0:12–0:25):** Create `Judge follow-up`, link it to Vocation, then log a failure: `Polished the page instead of sending it`.
-3. **Reflection (0:25–0:40):** Link the mission. Fill achieved, failed, what happened, why, lesson, adaptation, and tomorrow. Save.
-4. **Morning Brief (0:40–0:52):** Refresh. Expand the retrieved-memory card and show that the new reflection ID and tomorrow implication changed priority rationale.
-5. **Library + Council (0:52–1:10):** Show the appointed public-domain editions. Ask: “I avoided the external test by polishing. What should change next?” Show all three reports.
-6. **Trace (1:10–1:22):** Expand personal and advisor evidence. Point to exact IDs, source title, locator, excerpt, evidence score, uncertainty, and disagreement handling.
-7. **Human control + WebMCP (1:22–1:30):** Propose the action, show it is not committed, then explicitly commit. Return to Today and show the audit-linked action. End on the WebMCP inspector and explain that its tools call the same D1 workflows.
+Ask the browser agent: “Review my recent history and active goals. Find the recurring pattern most likely to block me today, include counterevidence, consult my appointed council using their books, and show me the evidence. Propose the smallest useful change to today's plan. Do not apply it until I approve.”
 
-Never describe deterministic council wording as an AI model call or the selected 18 passages as full-book grounding.
+1. Open Transparency first. Show the always-visible 12-tool catalogue and the separate live browser-discovery status.
+2. Let the agent read current context, recent history, patterns/counterevidence, and appointed source packs. The matching UI views expose the same records and IDs.
+3. Convene Council. Before the run, point out the three appointments, book scope, two evidence lanes, and five stages. Afterward, compare distinct reasoning, confidence rationale, uncertainty, disagreement, personal evidence, counterevidence, and exact book excerpts/locators.
+4. Open Transparency to follow the non-technical trace: reads, retrieval, deliberation mode, validation, and `Human control · unchanged`.
+5. Stage the recommendation. Return to Today or query context to prove there is a pending proposal and zero actions.
+6. Ask for explicit approval. Commit once; retry the same proposal to show HTTP 409 replay rejection. The approved change appears in Today, Missions, Morning Brief, and the tool audit.
+7. Record progress/reflection later to leave durable evidence that the next consultation can retrieve.
+
+Local screenshots and tests use `deterministic-test-fixture`, which must never be described as AI reasoning. Production prefers Workers AI structured generation and labels `deterministic-fallback` on failure. Never describe the selected 18 passages as full-book grounding, and never claim the browser-agent journey passed live until it is exercised after deployment.

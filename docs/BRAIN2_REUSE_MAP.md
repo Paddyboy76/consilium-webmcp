@@ -1,0 +1,32 @@
+# Brain2 → Consilium WebMCP reuse map
+
+Prepared before Pass 2 implementation on 2026-09-02. `/home/patadmin/brain2` was inspected read-only. No personal database, journal, uploaded book, environment file, or backend data was copied.
+
+## Decision
+
+Keep the existing dependency-free Worker static shell and port the original markup, design tokens, information hierarchy, and interactions. A direct React/Vite transplant would add a second build pipeline and routing/state layer while every required view already has a D1-backed Worker endpoint. The safer high-fidelity path is the original frontend's own square-cornered `#0a0a0a`/`#111111`/`#f15023` mono visual system and workflows, adapted through the compact `api()`/`post()` adapter in `web/app.js`.
+
+## Exact source mapping
+
+| Product surface | Original Brain2 source | Reused/adapted here | API adaptation |
+|---|---|---|---|
+| Shell, desktop/sidebar and mobile drawer | `frontend/src/components/layout/AppShell.jsx`, `frontend/src/components/layout/Sidebar.jsx`, `frontend/src/router/SimpleRouter.jsx` | `web/index.html`, `web/styles.css`, hash router in `web/app.js` | None; navigation is static and accessible without JS framework runtime. |
+| Home / Today dashboard | `frontend/src/components/layout/HomeView.jsx`, `frontend/src/components/dashboard/ConsiliumDashboard.jsx`, `frontend/src/components/dashboard/StatsPanel.jsx` | Today command header, horizon metrics, active front, last adaptation, recent history | `GET /api/product`, `GET /api/context`. |
+| Goals / projects / areas | `frontend/src/pages/GoalsDashboardPage.jsx`, `frontend/src/pages/ProjectsPage.jsx`, `frontend/src/pages/ProjectDetailPage.jsx`, `frontend/src/components/goals/GoalCard.jsx`, `GoalDetail.jsx`, `GoalForm.jsx`, `GoalList.jsx`, `frontend/src/components/projects/ProjectCreationFlow.jsx`, `ProjectCreationWizard.jsx`, `PlanOverviewScreen.jsx`, `GoalPreviewScreen.jsx` | Area-grouped mission board, horizon/status/progress treatment, create and progress dialogs | `POST /api/missions`, `POST /api/progress`; D1 replaces Brain2 API calls. |
+| Progress | `frontend/src/components/goals/GoalCard.jsx`, `GoalDetail.jsx`, `frontend/src/components/layout/Dashboard.jsx` | Inline progress rails and evidence logging | `POST /api/progress`; atomic mission progress update plus history row. |
+| Journal | `frontend/src/pages/JournalPage.jsx` | Chronological journal with result/reflection differentiation and inspectable IDs | `GET /api/product`. |
+| Evening reflection | `frontend/src/pages/EveningReflectionPage.jsx`, reflection flow inside `frontend/src/components/layout/AppShell.jsx`, `frontend/src/components/journal/ReflectionFlow.jsx` | CAAR-style seven-field reflection dialog and adaptation/tomorrow outcome | `POST /api/reflections`. |
+| Morning brief | `frontend/src/pages/MorningBriefPage.jsx`, `frontend/src/components/dashboard/MorningBrief.jsx` | Priority-ranked brief, retrieved memory, evidence IDs | `POST /api/briefs/generate`, persisted in D1. |
+| Council | `frontend/src/pages/ConsultPage.jsx`, council overlays in `frontend/src/components/layout/AppShell.jsx`, `frontend/src/components/ui/CouncilBriefRenderer.jsx`, `SourceCitation.jsx` | Question-first consultation, advisor cards, synthesis, source/personal evidence drawers, proposal gate | `GET/POST /api/council`, `POST /api/proposals`, `POST /api/actions/commit`. |
+| Library / advisor appointment | `frontend/src/pages/LibraryPage.jsx` | Source-pack cards, appointment state, edition/locator visibility | `GET /api/council`, `POST /api/council/appointments`. |
+| Transparency / analytics | `frontend/src/pages/TransparencyPage.jsx`, `frontend/src/components/transparency/TransparencyPanel.jsx`, `GeminiCallList.jsx`, `GeminiCallDetail.jsx`, `frontend/src/components/modals/AnalyticsModal.jsx` | Flight-recorder presentation, readable trace stages, WebMCP contract catalogue, live capability and last-call status | `GET /api/product`, consultation trace response, WebMCP invocation audit. |
+| Design system | `frontend/src/index.css` | Exact core tokens (`#0a0a0a`, `#111111`, square corners, mono stack, orange/green/red/cyan/purple accents), uppercase tracking, border-led hierarchy | No adapter. External Google font import is intentionally omitted; local/system mono stack avoids a third-party request. |
+
+## Deliberate demo-scale reductions
+
+- Brain2's large multi-step project wizard is represented by a persisted project/goal dialog with the same hierarchy, why, horizon, target date, and progress loop. The wizard's speculative AI generation steps are omitted because they are not required to demonstrate persisted planning.
+- Gemini-specific flight-recorder token/latency screens are adapted into provider-neutral Council/WebMCP transparency. This deployment uses Workers AI only; retaining Gemini labels would be false.
+- Intelligence overlays and deploy marketing modals are omitted. Their useful action—ask the council about current context—is present directly in Council and through typed WebMCP tools.
+- Brain2 local-storage directives are replaced by D1 proposals/actions and audit records so browser agents and humans share state.
+- No private Brain2 book library or user data is migrated. Only the repository's small, attributed public-domain source packs are available.
+

@@ -14,14 +14,15 @@
     "deploy:production": "wrangler deploy --config wrangler.production.jsonc"
   },
   "dependencies": {
-    "@openai/agents": "latest",
     "zod": "latest"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "latest",
     "@cloudflare/workers-types": "latest",
     "@eslint/js": "latest",
+    "@types/node": "^26.4.0",
     "eslint": "latest",
+    "playwright": "^1.62.1",
     "typescript": "latest",
     "typescript-eslint": "latest",
     "vitest": "latest",

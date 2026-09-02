@@ -15,4 +15,4 @@ Consilium existed before August 25, 2026 as a private personal planning/memory a
 | `pages/TransparencyPage.jsx` | Adapted: safe trace rather than hidden reasoning; canonical evidence, confidence, uncertainty, and validation. |
 | FastAPI/Postgres/Chroma services | Intentionally omitted. Concepts and boundaries were reimplemented through D1, Vectorize, Workers AI embeddings, and Worker bindings. |
 
-The recovery does not claim pixel parity or full Brain2 capability. It ports the recognizable shell and the coherent golden loop only.
+Pass 2 expands this into the complete navigable demo-scale experience: Today, areas/projects/goals, progress/patterns with counterevidence, journal/reflection, morning brief, council, library/appointments, and transparency/analytics. The exact file-level mapping, adapters, and deliberate reductions are recorded in `docs/BRAIN2_REUSE_MAP.md`. It claims direct reuse of Brain2's interaction structure and design system—not copied private data or pixel identity with every historical screen.

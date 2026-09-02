@@ -65,9 +65,10 @@ export const SOURCE_CHUNKS:SourceChunk[]=[
 ];
 
 export function buildEvidenceBundle(question:string,history:TimelineEvent[],appointed=['marcus-aurelius','epictetus','sun-tzu']):EvidenceBundle{
-  const relevant=history.filter(e=>e.tags.some(t=>['pilot','morning','single-priority','constraint','recommendation-outcome','adaptation'].includes(t))).slice(-18);
+  const patterns=inferPatterns(history),patternEvidence=new Set(patterns.flatMap(pattern=>[...pattern.supportingIds,...pattern.contradictoryIds]));
+  const relevant=history.filter(e=>e.tags.some(t=>['pilot','morning','single-priority','constraint','recommendation-outcome','adaptation'].includes(t))||patternEvidence.has(e.id));
   const sourceByAdvisor=Object.fromEntries(appointed.slice(0,3).map(id=>[id,SOURCE_CHUNKS.filter(c=>c.advisorId===id)]));
-  return {question,goals:['Validate the accessibility audit pilot before expanding scope'],constraints:relevant.filter(e=>e.type==='constraint'),history:relevant,priorAdvice:history.filter(e=>e.type==='recommendation'),outcomes:history.filter(e=>e.type==='outcome'&&e.tags.includes('recommendation-outcome')),adaptations:history.filter(e=>e.type==='adaptation'),patterns:inferPatterns(history),sourceByAdvisor};
+  return {question,goals:['Validate the accessibility audit pilot before expanding scope'],constraints:relevant.filter(e=>e.type==='constraint'),history:relevant,priorAdvice:history.filter(e=>e.type==='recommendation'),outcomes:history.filter(e=>e.type==='outcome'&&e.tags.includes('recommendation-outcome')),adaptations:history.filter(e=>e.type==='adaptation'),patterns,sourceByAdvisor};
 }
 
 const adviceByAdvisor:Record<string,{source:string;recommendation:string}>={
@@ -82,9 +83,10 @@ export function fixtureReports(bundle:EvidenceBundle):AdvisorReport[]{
   if(!personalId) return [];
   return Object.keys(bundle.sourceByAdvisor).map(advisorId=>{
     const config=adviceByAdvisor[advisorId]; const source=config&&bundle.sourceByAdvisor[advisorId]?.find(s=>s.id===config.source);
-    if(!config||!source) return {advisorId,questionInterpreted:bundle.question,evidence:[],claims:[],recommendation:'ABSTAIN',personalEvidenceThatChangedAdvice:[],uncertainty:'No verified source passage.',confidence:0,abstained:true,abstentionReason:'SOURCE_EVIDENCE_INSUFFICIENT'};
+    if(!config||!source) return {advisorId,questionInterpreted:bundle.question,evidence:[],claims:[],recommendation:'ABSTAIN',personalEvidenceThatChangedAdvice:[],uncertainty:'No verified source passage.',confidence:0,reasoning:'No reasoning generated.',confidenceRationale:'Required source evidence was unavailable.',disagreement:'Not applicable.',counterevidenceIds:[],abstained:true,abstentionReason:'SOURCE_EVIDENCE_INSUFFICIENT'};
     const recommendation=adaptation?.status==='active'?config.recommendation:'First rebuild a protected single-action routine; history no longer supports assuming this morning block will succeed.';
-    return {advisorId,questionInterpreted:bundle.question,evidence:[{id:personalId,lane:'personal',relevance:'Recent outcome changes feasibility.',retrievalScore:.91},{id:source.id,lane:'advisor',relevance:'Verified doctrine shapes interpretation.',retrievalScore:source.retrievalScore}],claims:[{text:recommendation,claimType:'personalized_recommendation',supportRelationship:'applied',personalEvidenceIds:[personalId],advisorEvidenceIds:[source.id]}],recommendation,personalEvidenceThatChangedAdvice:[personalId],uncertainty:'A short synthetic history cannot guarantee outcomes.',confidence:adaptation?.status==='active'?.9:.58,abstained:false,abstentionReason:''};
+    const counterevidenceIds=bundle.patterns.find(pattern=>pattern.id==='pat-overload-v1')?.contradictoryIds.slice(-2)??[];
+    return {advisorId,questionInterpreted:bundle.question,evidence:[{id:personalId,lane:'personal',relevance:'Recent outcome changes feasibility.',retrievalScore:.91},{id:source.id,lane:'advisor',relevance:'Verified doctrine shapes interpretation.',retrievalScore:source.retrievalScore}],claims:[{text:recommendation,claimType:'personalized_recommendation',supportRelationship:'applied',personalEvidenceIds:[personalId],advisorEvidenceIds:[source.id]}],recommendation,personalEvidenceThatChangedAdvice:[personalId],uncertainty:'A short synthetic history cannot guarantee outcomes.',confidence:adaptation?.status==='active'?.9:.58,reasoning:`The protected single-action adaptation repeatedly preceded follow-through. ${counterevidenceIds.length?'Urgency also overcame overload in the cited counterevents, so the mechanism is not certain.':''}`,confidenceRationale:'Repeated synthetic outcomes support the direction, but the sample is short and context-specific.',disagreement:'The advisors agree on the action but differ on whether duty, agency, or advantageous conditions best explain it.',counterevidenceIds,abstained:false,abstentionReason:''};
   });
 }
 

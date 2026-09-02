@@ -1,42 +1,51 @@
-# Recovery status
+# Recovery status — Pass 2
 
 Updated: 2026-09-02 UTC
 
-## Identity
+## Identity and release
 
-- Starting SHA: `d971e6b1a0a2d512aac863dd2a9c77044efb8a75`
-- Recovery implementation SHA: `2e5035f5dbcc2420b6f981ca5a69495830560e5c`
-- Branch / remote parity: implementation SHA pushed to `origin/main`; this status-only closure follows it.
-- Deployment URL/version: pending gated deployment
+- Pass 2 starting SHA: `eb55fb6f468f590f2b37113785a602eca1b862ed` (clean and pushed).
+- Final SHA: recorded after the final gate and commit.
+- Origin parity: recorded after push.
+- Live Worker: intentionally unchanged during local work.
 
-## Shipped feature map
+## Recognizable Consilium breadth
 
-- Brain2-inspired Sovereign dark shell with responsive navigation for Today, Missions, Morning Brief, Journal/Reflection, Council, Library/Advisors, and Transparency/Trace.
-- Four synthetic life areas and eight linked cross-horizon seed missions.
-- Persisted mission/project creation, progress/outcome/failure logging, linked CAAR reflection, timeline, and reflection-influenced morning brief.
-- Advisor appointment, arbitrary council question, three visible reports, synthesis, canonical trace, and proposal-before-commit control.
-- Nine stable WebMCP tools plus the dynamic one-use commit tool, all calling the visible UI’s endpoints; mutating recovery tools create `webmcp_calls` records.
+- Direct Brain2 reuse/adaptation is mapped in `docs/BRAIN2_REUSE_MAP.md`, including exact original paths, API adapters, and omissions.
+- The shell uses Brain2's Sovereign identity and exact core mono/black/graphite/orange design language.
+- Complete navigation: Today; areas/projects/goals; progress/patterns; morning brief; journal/reflection; council; library/advisors; transparency/analytics.
+- D1-backed demo functions: mission creation, progress/outcomes, CAAR reflection, history-influenced brief, appointments, consultations/traces/recommendations, proposal, atomic commit, replay rejection, and audit.
+- Approved plan changes visibly appear in Today, Missions, and Morning Brief. Pending proposals are separately labelled as application-unchanged.
 
-## Schema and corpus
+## WebMCP and council
 
-- Migration `0003_recovery_product.sql`: six session-scoped application tables and indexes.
-- Source packs: 3 public-domain editions, 6 selected passages each, 18 advisor passages total. This is not full-book grounding.
-- Vector target after ingestion: 96 synthetic personal-event vectors + 18 advisor vectors = 114, BGE base English v1.5, 768 dimensions, cosine.
-- Reasoning: deterministic evidence-bounded council; Workers AI supplies production embeddings. No language-model call was made during recovery development and deterministic output is labelled.
+- 12 always-visible typed tool contracts: four state/evidence reads, four persisted planning/reflection workflows, trace-only consultation and inspection, proposal staging, and approval-gated commit.
+- Ordinary browsers say “browser agent discovery unavailable” without suggesting the implementation is absent. The catalogue, read/write class, matching UI, and last tool call/result remain visible.
+- Production council model/config: `@cf/meta/llama-3.1-8b-instruct-fast`, `workers-ai-json-council-v2`, one non-streaming `response_format.type=json_schema` call for three advisors plus synthesis.
+- Only canonical retrieved personal items and appointed source passages enter the prompt. Server hydration rejects malformed output, the wrong advisor set, unknown personal IDs, and cross-advisor/unknown source IDs. Every report exposes reasoning, recommendation, uncertainty, confidence rationale, disagreement, both citation lanes, and counterevidence.
+- Deterministic wording remains only `deterministic-test-fixture` locally or clearly labelled `deterministic-fallback` after production generation/validation failure. No OpenAI package, key, or provider remains.
 
-## Acceptance evidence
+## Corpus and derived index
 
-- `npm run check`: passed.
-- `npm test`: 10 files / 45 tests passed, including the recovered D1 operating-loop integration.
-- Local HTTP marker journey `RECOVERY-E2E-20260902`: goal created; failure logged; linked adaptation stored; brief rationale changed to “Send the marked invitation before opening design tools”; three dual-grounded reports returned; trace inspected; proposal confirmed non-mutating; commit succeeded; replay rejected.
-- Real Chromium screenshots: `/tmp/consilium-1440.png` (Today, 1440×900), `/tmp/consilium-768.png` (Missions, 768×1024), `/tmp/consilium-390.png` (Journal, 390×844), plus `/tmp/consilium-council-1440.png`. Visual inspection passed; a browser mutation produced visible `BROWSER-E2E-20260902` mission state with zero console/page errors and no 1440px body overflow.
-- Wrangler 4.127.1 types generated; production `wrangler deploy --dry-run` passed (3 assets, D1, Vectorize, Workers AI bindings).
-- Diff hygiene and targeted private-data/credential/copyright scans passed; only synthetic records and selected public-domain primary passages were added.
+- 3 narrow public-domain source packs; 6 passages each; 18 canonical advisor passages total. This is not full-book grounding and count is not a quality claim.
+- Expected production derived index: 96 synthetic personal vectors + 18 advisor vectors = 114, Workers AI BGE base English v1.5, 768 dimensions.
+- Canonical text, edition provenance, source hashes, stable IDs, and locators remain in D1/source manifests; Vectorize contains embeddings and lookup metadata.
 
-## Honest gaps / blockers
+## Local evidence
 
-- Deployment blocker: the existing Wrangler OAuth token is expired and this terminal is non-interactive (`wrangler whoami` 403 / “auth token has expired”). Per release policy, no token workaround was attempted. Remote backup, migration, 12 new advisor-vector upserts, deploy, and live acceptance were therefore not run.
+- Final local gate: `npm run check` passed; `npm test` passed (11 files / 53 tests); production-config Wrangler dry run passed with D1, Vectorize, Workers AI, and 3 static assets.
+- Local Chromium contract: zero console/page errors; 1440 px body width equals viewport; 12 catalogue rows present.
+- Screenshots: `artifacts/pass2/today-1440x900.png`, `missions-768x1024.png`, `journal-390x844.png`, `council-before-1440x900.png`, `council-after-1440x900.png`, and `transparency-1440x900.png`.
+- Local browser golden contract (`deterministic-test-fixture`): proposal persisted with zero actions; explicit commit produced one action; same-proposal replay returned 409; approved change visible in Today, Missions, and Brief.
+- This is local contract evidence only. A WebMCP-capable browser has not exercised the deployed journey, so no live golden-pass claim is made.
 
-## 90-second judge walkthrough
+## Remaining release blocker
 
-Open Today: point out four life areas, active cross-horizon missions, recent evidence, and last adaptation. Create a marked Today goal in Missions and log a failure. Complete the linked evening reflection, naming why and a Version-2 adaptation. Refresh Morning Brief and open its evidence: the new reflection ID and tomorrow implication now explain priority one. In Library, inspect and appoint the public-domain advisors. Ask the Council what to do about the failure. Expand the three reports, then open Trace for canonical personal IDs and book title/locator/excerpt. Stage the recommendation: show that no action exists. Explicitly commit it and return to Today to show the action and audit-linked ID. Finish on the WebMCP inspector: the browser agent and the human used the same state transitions.
+Final `npx wrangler whoami` returned Cloudflare HTTP 403 (bot-challenge HTML), then confirmed the OAuth token is expired and cannot refresh in this non-interactive environment. Per instruction, no API-token workaround was used. The sole remaining blocker is interactive Cloudflare reauthentication followed by:
+
+```bash
+npx wrangler d1 migrations apply consilium-webmcp-prod --remote --config wrangler.production.jsonc
+npm run deploy:production
+```
+
+Then run at most two real Workers AI consultations, the WebMCP-capable browser golden journey, and live trace/proposal/commit/replay verification.

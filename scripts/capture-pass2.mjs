@@ -1,0 +1,22 @@
+import { chromium } from 'playwright';
+import { mkdir } from 'node:fs/promises';
+
+const base=process.env.CONSILIUM_CAPTURE_URL??'http://127.0.0.1:8790';
+const output='artifacts/pass2';
+await mkdir(output,{recursive:true});
+const browser=await chromium.launch({headless:true});
+const page=await browser.newPage({viewport:{width:1440,height:900}});
+const errors=[];
+page.on('console',message=>{if(message.type()==='error')errors.push(message.text())});
+page.on('pageerror',error=>errors.push(error.message));
+await page.goto(base,{waitUntil:'networkidle'});
+await page.screenshot({path:`${output}/today-1440x900.png`,fullPage:true});
+await page.setViewportSize({width:768,height:1024});await page.goto(`${base}/#missions`,{waitUntil:'networkidle'});await page.screenshot({path:`${output}/missions-768x1024.png`,fullPage:true});
+await page.setViewportSize({width:390,height:844});await page.goto(`${base}/#journal`,{waitUntil:'networkidle'});await page.waitForTimeout(350);await page.screenshot({path:`${output}/journal-390x844.png`,fullPage:true});
+await page.setViewportSize({width:1440,height:900});await page.goto(`${base}/#council`,{waitUntil:'networkidle'});await page.screenshot({path:`${output}/council-before-1440x900.png`,fullPage:true});
+await page.locator('#consult-form button').click();await page.locator('#council-result .reports').waitFor();await page.screenshot({path:`${output}/council-after-1440x900.png`,fullPage:true});
+await page.goto(`${base}/#trace`,{waitUntil:'networkidle'});await page.screenshot({path:`${output}/transparency-1440x900.png`,fullPage:true});
+const metrics={errors,bodyWidth:await page.evaluate(()=>document.body.scrollWidth),viewportWidth:await page.evaluate(()=>innerWidth),toolContracts:await page.locator('#tool-inspector .tool-row').count()};
+await browser.close();
+if(errors.length||metrics.bodyWidth>metrics.viewportWidth||metrics.toolContracts!==12)throw new Error(JSON.stringify(metrics));
+console.log(JSON.stringify(metrics));

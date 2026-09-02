@@ -5,6 +5,7 @@ export const ClaimSchema = z.object({ text:z.string().max(1200), claimType:z.enu
 export const AdvisorReportSchema = z.object({
   advisorId:z.string(), questionInterpreted:z.string().max(600), evidence:z.array(EvidenceRefSchema).max(20), claims:z.array(ClaimSchema).max(8),
   recommendation:z.string().max(1600), personalEvidenceThatChangedAdvice:z.array(z.string()).max(12), uncertainty:z.string().max(800), confidence:z.number().min(0).max(1),
+  reasoning:z.string().max(1800).optional(), confidenceRationale:z.string().max(800).optional(), disagreement:z.string().max(800).optional(), counterevidenceIds:z.array(z.string()).max(8).optional(),
   abstained:z.boolean(), abstentionReason:z.string()
 });
 export type AdvisorReport = z.infer<typeof AdvisorReportSchema>;
