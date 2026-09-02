@@ -1,32 +1,26 @@
-# Recovery status — Pass 5
+# Recovery status — Pass 6
 
 Updated: 2026-09-02 UTC
 
-## Implemented gaps
+## Observed production failure
 
-- Audited the challenge app against the read-only Brain2 shell, dashboard, goal/project, journal/reflection, brief, council/library and transparency sources. The checked disposition matrix is `docs/FUNCTIONAL_FIDELITY_MATRIX.md`.
-- Added standalone D1 journal entries linked to a canonical life area and optional mission/goal, exposed through both the human form and `record_journal_entry` WebMCP contract.
-- Restored explicit active/paused/completed mission status in the progress workflow. Outcome evidence, percentage and status update through the same validated D1 path.
-- Expanded Journal/History into an area-filtered longitudinal record showing standalone entries, progress, legacy reflection detail, and complete structured nightly reflection facts, interpretations, per-goal outcomes, failure reasons, adaptations and directives.
-- Changed approved council actions from detached display-only records into real audit-linked Today goals in the proposal’s target area. A staged proposal still mutates no action/mission; explicit approval commits once; Today, Missions and Morning Brief render the change; replay returns 409.
-- Reorganized the always-visible WebMCP catalogue into Reads, Structured writes and Gated actions. It now contains 13 contracts. Ordinary Chromium truthfully reports browser discovery unavailable while keeping the complete catalogue and human workflows visible.
-- Fixed a browser-only Transparency regression found during acceptance: large audit JSON can no longer force horizontal overflow.
+Pass 5 commit `26fc3c780dbf66e45c674d59efab2d3d09f310c5` is deployed as Worker version `55647ce7-fd6f-4caa-95e1-781def5baa83`, with migrations 0003–0006 applied. The live 13-tool WebMCP journey works, but its one bounded `consult_council` call returned `modelMode: deterministic-fallback` and `fallbackReason: AI_UNKNOWN_PERSONAL_CITATION`. The canonical allowlist correctly rejected a model-invented personal identifier; the safety boundary held, but generated citation selection was not reliable enough for the final production proof.
 
-## Preserved fidelity
+## Pass 6 repair
 
-All Pass 1–4 behavior remains: exact PHY/MNT/SPR/SOC/FIN/VOC taxonomy and synthetic linked histories; full nightly biometrics + anchor + six CAAR + every-Today-goal contract; missed-goal validation; relational facts/directives; evidence-derived morning brief; appointed public-domain source packs; distinct dual-grounded council reports; counterevidence/disagreement/uncertainty; canonical citation allowlisting; labelled fallback; genuine Brain2 Enso; durable trace; and D1/Vectorize/Workers AI production bindings. No live Workers AI call was made.
+- Removed every citation-identifier field from the Workers AI output contract. The model now returns a strict fixed-key object for exactly `marcus-aurelius`, `epictetus`, and `sun-tzu`, plus synthesis. Missing, wrong, duplicate-shaped, or extra advisor keys fail closed.
+- Retrieval/server code now owns all evidence attachment. It selects canonical personal support, canonical counterevidence, and up to two passages from each advisor’s own retrieved appointed pack. The model receives those exact event and passage texts without their IDs and is asked only for bounded interpretation and prose.
+- Added explicit provenance to output, persisted report validation, visible trace events, and the WebMCP audit record: evidence is `retrieval-server`; interpretation is `workers-ai-generated`; the model cannot select identifiers. No invented identifier is silently replaced.
+- Preserved one bounded Workers AI call for all three reports and synthesis, the labelled deterministic fallback for genuine provider/schema failure, canonical D1/Vectorize allowlisting, non-mutation, durable trace, and proposal/approval gating.
+- Updated `scripts/cloudflare-live-proof.mjs` for health mode `workers-ai-structured-with-labelled-fallback`. Final acceptance now requires `modelMode: workers-ai-structured`, `fallbackReason: null`, three distinct voices, retrieval-owned provenance, and membership of every personal/counter/source ID in the correct canonical lane and advisor pack; it no longer assumes one exact retrieved ID.
+- Updated the production model configuration label to `workers-ai-json-council-v3-retrieval-owned-evidence`.
 
-## Acceptance proof
+## Verification
 
-- Targeted tests were run while editing.
-- Final full verification after the last code change: TypeScript/ESLint passed, 13 Vitest files / 60 tests passed, and the production-config Wrangler dry-run passed with D1, Vectorize, Workers AI and static assets; it did not deploy.
-- Chromium golden journey: 1440×900 and 390×844, zero console/page errors, document width exactly viewport width, staged actions `0`, committed linked Today goal visible, replay HTTP `409`.
-- Ten compact screenshots are under `artifacts/pass5/`: desktop Today/navigation, six-area missions, linked journal/history, completed structured reflection, evidence-derived brief, grounded council, staged no-mutation gate, approved Today, WebMCP trace/catalogue, and mobile navigation/history.
+- Targeted model-boundary and production-lane Worker tests cover a valid structured result, structurally impossible invented/cross-advisor IDs, malformed advisor sets, canonical hydration, persistence provenance, and non-mutation.
+- The final full `npm run check`, `npm test`, and production-config dry-run are recorded at handoff after the final code change.
+- No live Workers AI call, remote Cloudflare call, migration, or deployment was made in this pass.
 
-## Intentional exclusions
+## Deployment handoff
 
-Private Brain2 user history, journals, Chroma/vector data, secrets and private/copyrighted books remain excluded. Gemini/OpenAI runtime, Debian/FastAPI/Postgres production dependencies, and private PDF upload are excluded for legal/runtime reasons. The large speculative AI project wizard is adapted into the complete direct persisted mission workflow; project/goal capability itself is not reduced.
-
-## Cloudflare release blocker
-
-No deployment was attempted. Wrangler OAuth/device flow remains blocked by Cloudflare HTTP 403 from this host. The prohibited API-token workaround was not used. When interactive OAuth works, apply remote migrations (including `0006_pass5_journal_commit.sql`), deploy with `wrangler.production.jsonc`, then run the live proof and the golden browser journey. Until then, local browser proof is labelled fixture/fallback and makes no production claim.
+Deploy the clean committed `main` with `wrangler.production.jsonc`, then spend the single remaining live consultation only through `scripts/cloudflare-live-proof.mjs`. Acceptance requires the consultation to remain `workers-ai-structured` with no fallback. Stop and investigate without another consultation if any pre-consultation health, D1, Vectorize, source-pack, or session assertion fails.
