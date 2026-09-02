@@ -1,4 +1,4 @@
-import { buildEvidenceBundle, buildSyntheticHistory, fixtureReports, inferPatterns, SOURCE_CHUNKS, synthesize, validateReport } from './domain';
+import { buildEvidenceBundle, buildRetrievedEvidenceBundle, buildSyntheticHistory, fixtureReports, inferPatterns, SOURCE_CHUNKS, synthesize, validateReport } from './domain';
 import { bestSources, COUNCIL_MODEL, COUNCIL_MODEL_CONFIG, councilFallbackReason, councilSchemaDiagnostic, personalLanes, runWorkersAiCouncil, selectPersonalEvidence } from './model';
 import { resolveSession } from './session';
 import { OPERATING_LIMITS } from './limits';
@@ -100,7 +100,7 @@ async function cloudflareEvidence(env:Bindings,question:string){
   const personal=(await retrievePersonal(index,vectors[0]!,'demo-user')).matches;
   const queried=await Promise.all(appointed.map(async(advisor,index)=>({advisor,...await retrieveAdvisor(env.VECTOR_INDEX,vectors[index+1]!,advisor.id,advisor.pack)})));
   const sourceByAdvisor:Record<string,SourceChunk[]>={};for(const item of queried)sourceByAdvisor[item.advisor.id]=await hydrateAdvisorMatches(env,item.matches);
-  const hydratedPersonal=await hydratePersonalMatches(env,personal),base=buildEvidenceBundle(question,hydratedPersonal),personalByAdvisor=personalLanes(question,base.history),bundle={...base,sourceByAdvisor,personalByAdvisor};
+  const hydratedPersonal=await hydratePersonalMatches(env,personal),canonicalHistory=await loadCanonicalHistory(env.DB),base=buildRetrievedEvidenceBundle(question,hydratedPersonal,canonicalHistory),personalByAdvisor=personalLanes(question,base.history),bundle={...base,sourceByAdvisor,personalByAdvisor};
   const scoreByVector=new Map(personal.map(match=>[match.id,match.score]));
   const personalCandidate=hydratedPersonal.map(item=>({id:item.id,score:scoreByVector.get(`vec-${item.id}`),area:item.area,relationship:item.relationship,linkedMission:item.goalId,author:item.author,time:item.occurredAt,outcome:item.outcome,provenance:item.provenance}));
   return {bundle,retrieval:{provider:'cloudflare-workers-ai-vectorize',model:'@cf/baai/bge-base-en-v1.5',candidates:{personal:personalCandidate,advisor:Object.fromEntries(queried.map(item=>[item.advisor.id,item.matches.map(match=>({id:match.id.replace(/^vec-/,''),score:match.score}))]))},selected:{personalByAdvisor:Object.fromEntries(appointed.map(({id})=>[id,selectPersonalEvidence(bundle,id as 'marcus-aurelius'|'epictetus'|'sun-tzu').map(item=>item.id)])),advisorByAdvisor:Object.fromEntries(appointed.map(({id})=>[id,bestSources(question,sourceByAdvisor[id]??[]).map(item=>item.id)]))}}};

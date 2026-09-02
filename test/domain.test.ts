@@ -1,5 +1,5 @@
 import { describe,expect,it } from 'vitest';
-import { buildEvidenceBundle,buildSyntheticHistory,delimitUntrustedBundle,fixtureCouncilRun,fixtureReports,inferPatterns,SOURCE_CHUNKS,synthesize,validateReport } from '../worker/domain';
+import { buildEvidenceBundle,buildRetrievedEvidenceBundle,buildSyntheticHistory,delimitUntrustedBundle,fixtureCouncilRun,fixtureReports,inferPatterns,SOURCE_CHUNKS,synthesize,validateReport } from '../worker/domain';
 import { authorizeCommit } from '../worker/proposals';
 
 const question='I have 45 minutes before work. What should I actually focus on today, and why?';
@@ -21,6 +21,16 @@ describe('longitudinal intelligence',()=>{
     expect(history.some(e=>e.tags.includes('rejected'))).toBe(true);
     expect(history.some(e=>e.tags.includes('recommendation-outcome')&&e.valence==='negative')).toBe(true);
     expect(history.some(e=>e.tags.includes('recommendation-outcome')&&e.valence==='positive')).toBe(true);
+  });
+
+  it('uses retrieved memories for immediate evidence and the full canonical history for patterns',()=>{
+    const canonical=buildSyntheticHistory(),retrieved=[canonical.at(-1)!,canonical[1]!,canonical[4]!];
+    const bundle=buildRetrievedEvidenceBundle('Mum dementia grief work capacity',retrieved,canonical);
+    expect(bundle.history.every(event=>retrieved.some(item=>item.id===event.id))).toBe(true);
+    const adaptation=bundle.patterns.find(pattern=>pattern.id==='pat-adaptation-v1')!;
+    expect(adaptation.status).toBe('active');
+    expect(Date.parse(adaptation.windowStart)).toBeLessThanOrEqual(Date.parse(adaptation.windowEnd));
+    expect(bundle.patterns.find(pattern=>pattern.id==='pat-overload-v1')!.supportingIds.length).toBeGreaterThan(3);
   });
 
   it('changes advice when only causal history changes',()=>{

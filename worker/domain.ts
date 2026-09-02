@@ -88,6 +88,11 @@ export function buildEvidenceBundle(question:string,history:TimelineEvent[],appo
   return {question,concerns,goals:['See whether a small accessibility-audit service is worth pursuing while serving existing clients','Stay connected to Mum while the family sells her house'],constraints:relevant.filter(e=>e.type==='constraint'),history:relevant,priorAdvice:history.filter(e=>e.type==='recommendation'&&selected.has(e.id)),outcomes:relevant.filter(e=>e.type==='outcome'),adaptations:relevant.filter(e=>e.type==='adaptation'),patterns,sourceByAdvisor,personalByAdvisor:personalLanes(question,relevant)};
 }
 
+export function buildRetrievedEvidenceBundle(question:string,retrievedHistory:TimelineEvent[],canonicalHistory:TimelineEvent[],appointed=['marcus-aurelius','epictetus','sun-tzu']):EvidenceBundle{
+  const retrieved=buildEvidenceBundle(question,retrievedHistory,appointed);
+  return {...retrieved,patterns:inferPatterns(canonicalHistory)};
+}
+
 const vocationalAdvice:Record<string,{source:string;recommendation:string;reasoning:string}>={
   'marcus-aurelius':{source:'marcus-b4-03',recommendation:'Use the available block for the honest task already chosen: send the current message and leave the website alone.',reasoning:'Present duty favors the direct, honest act already in front of Maya.'},
   epictetus:{source:'epictetus-ench-01a',recommendation:'Send the clear message; Maya can choose the ask, while the reply remains outside her control.',reasoning:'The record separates Maya’s action from another person’s answer.'},
