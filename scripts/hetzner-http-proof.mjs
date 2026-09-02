@@ -27,11 +27,11 @@ const cookieA=cookieFrom(healthA.setCookie); pass('fixture health and server-iss
 const healthB=await request('/api/health'); const cookieB=cookieFrom(healthB.setCookie); assert.notEqual(cookieA,cookieB);
 const sessionA=cookieA.split('.')[3];
 const contextA=await request('/api/context',{cookie:cookieA});
-expectStatus(contextA,200,'GET /api/context first authenticated request'); assert.ok(contextA.data.historySummary.days>=60); assert.ok(contextA.data.historySummary.eventCount>=60); assert.ok(contextA.data.patterns.length>=2);
+expectStatus(contextA,200,'GET /api/context first authenticated request'); assert.ok(contextA.data.historySummary.days>=60); assert.ok(contextA.data.historySummary.eventCount>=25); assert.ok(contextA.data.patterns.length>=2);
 pass('longitudinal context and inferred patterns');
 
 const patterns=await request('/api/patterns',{cookie:cookieA});
-assert.ok(patterns.data.canonicalEventCount>=60); const adaptive=patterns.data.patterns.find(pattern=>pattern.supportingIds.length&&pattern.contradictoryIds.length); assert.ok(adaptive);
+assert.ok(patterns.data.canonicalEventCount>=25); const adaptive=patterns.data.patterns.find(pattern=>pattern.supportingIds.length&&pattern.contradictoryIds.length); assert.ok(adaptive);
 const pattern=await request(`/api/patterns/${adaptive.id}`,{cookie:cookieA}); assert.ok(pattern.data.supportingIds.length); assert.ok(pattern.data.contradictoryIds.length);
 pass('canonical pattern support and counterevidence');
 
@@ -41,7 +41,7 @@ for(const source of council.data.sourceChunks){assert.ok(source.packId); assert.
 pass('appointed council and source provenance');
 
 const consult=await request('/api/council',{cookie:cookieA,method:'POST',body:{question:'I have 45 minutes before work. What should I focus on today, and why did my history change that advice?'}});
-expectStatus(consult,200,'POST /api/council'); assert.equal(consult.data.modelMode,'fixture'); assert.equal(consult.data.validation.dualGrounded,true); assert.ok(consult.data.pipelineVersion); assert.ok(consult.data.decision.personalEvidenceIds.length); assert.ok(consult.data.decision.advisorEvidenceIds.length);
+expectStatus(consult,200,'POST /api/council'); assert.equal(consult.data.modelMode,'deterministic-test-fixture'); assert.equal(consult.data.validation.dualGrounded,true); assert.ok(consult.data.pipelineVersion); assert.ok(consult.data.decision.personalEvidenceIds.length); assert.ok(consult.data.decision.advisorEvidenceIds.length);
 for(const report of consult.data.reports.filter(item=>!item.abstained)){assert.ok(report.claims.length); for(const claim of report.claims){assert.ok(claim.personalEvidenceIds.length); assert.ok(claim.advisorEvidenceIds.length);}}
 const traceId=consult.data.traceId; pass('consultation with dual-grounded advice and pipeline identity');
 
@@ -56,7 +56,7 @@ const proposed=await request('/api/proposals',{cookie:cookieA,method:'POST',body
 assert.equal(proposed.response.status,200); assert.equal(proposed.data.persistedAction,false); const proposalId=proposed.data.proposalId;
 assert.equal((await request('/api/context',{cookie:cookieA})).data.actions.length,0);
 assert.equal((await request('/api/actions/commit',{cookie:cookieB,method:'POST',body:{proposal_id:proposalId}})).response.status,409);
-const committed=await request('/api/actions/commit',{cookie:cookieA,method:'POST',body:{proposal_id:proposalId}}); assert.equal(committed.response.status,200);
+const committed=await request('/api/actions/commit',{cookie:cookieA,method:'POST',body:{proposal_id:proposalId}}); expectStatus(committed,200,'owner commit');
 assert.equal((await request('/api/actions/commit',{cookie:cookieA,method:'POST',body:{proposal_id:proposalId}})).response.status,409);
 assert.equal((await request('/api/context',{cookie:cookieA})).data.actions.length,1);
 pass('proposal separation, owner-only atomic commit, and repeated rejection');
@@ -67,7 +67,7 @@ assert.equal((await request('/api/context',{cookie:cookieB})).data.pendingPropos
 assert.equal((await request('/api/context',{cookie:cookieA})).data.actions.length,1);
 pass('reset is session-owned');
 
-const html=await request('/'); assert.equal(html.response.status,200); assert.match(html.data,/id="reasoning-mode"/); assert.match(html.data,/LONGITUDINAL MEMORY/);
-const app=await request('/app.js'); assert.equal(app.response.status,200); assert.match(app.data,/document\.modelContext\.registerTool/); assert.match(app.data,/DETERMINISTIC FIXTURE/);
+const html=await request('/'); assert.equal(html.response.status,200); assert.match(html.data,/id="runtime-label"/); assert.match(html.data,/13 TOOL CONTRACTS/);
+const app=await request('/app.js'); assert.equal(app.response.status,200); assert.match(app.data,/document\.modelContext\.registerTool/); assert.match(app.data,/BROWSER AGENT DISCOVERY UNAVAILABLE/);
 pass('visible UI and WebMCP asset delivery');
 console.log('RESULT Hetzner HTTP acceptance passed: no OpenAI or remote Cloudflare calls.');

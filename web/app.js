@@ -9,18 +9,18 @@ const date=v=>new Intl.DateTimeFormat('en',{month:'short',day:'numeric',year:'nu
 const advisorNames={'marcus-aurelius':'Marcus Aurelius',epictetus:'Epictetus','sun-tzu':'Sun Tzu'};
 const advisorPerspectives={'marcus-aurelius':'Helps Maya return to the responsibility in front of her instead of escaping into more preparation.',epictetus:'Separates the action Maya can choose—asking clearly—from the reply she cannot control.','sun-tzu':'Looks for the least wasteful conditions: a quiet morning and a direct question instead of a website rebuild.'};
 const caarQuestions=[
-  ['q1_today_intent','What moved','What did I actually move forward today?'],
-  ['q2_top_win','What got stuck','Where did I get stuck, and what could I try differently tomorrow?'],
-  ['q3_top_failure','Energy','When did I feel most clear or energized, and what was happening around me?'],
-  ['q4_pattern_notice','What helped','What went well, and what did I do that helped?'],
-  ['q5_tomorrow_priority','Honesty','What did I do today that did not match the person I want to be?'],
-  ['q6_if_then_plan','Tomorrow',"What matters most tomorrow, and what will I do if the likely obstacle shows up?"]
+  ['q1_today_intent','Intent / outcome','What did I intend to do, and what actually happened?'],
+  ['q2_top_win','Win','What was my real win, and what friction did I overcome?'],
+  ['q3_top_failure','Failure without blame','What did not happen, and what mechanism got in the way?'],
+  ['q4_pattern_notice','Cautious pattern','What pattern might I be seeing, including evidence that points the other way?'],
+  ['q5_tomorrow_priority','One priority','What is my one honest priority tomorrow?'],
+  ['q6_if_then_plan','If–then plan','If the likely obstacle appears, then what exactly will I do?']
 ];
 const workflowStages=(kind,names=[])=>kind==='reflection'?['Validating today’s goals and reflection structure.','Retrieving relevant journal, progress, adaptations, and counterevidence.','Analyzing goal performance and readiness.','Validating canonical citations.','Forming tomorrow’s goals/recommendations.']:kind==='brief'?['Retrieving the latest accepted reflection and active goals.','Retrieving relevant journal, progress, adaptations, earlier recommendations, and counterevidence.','Analyzing goal performance and readiness.','Validating canonical evidence IDs.','Persisting the replacement morning brief.']:['Reading current state and appointed source packs.',...names.map((name,index)=>`Consulting ${name} about ${index===0?'the retrieved tension':index===1?'agency and control':'strategy and conditions'}.`),'Reconciling disagreements.','Validating canonical citations.','Staging changes for explicit approval.'];
 async function withStages(kind,work){const loader=$('#workflow-loader'),names=(council?.appointed||[]).map(id=>advisorNames[id]||id),stages=workflowStages(kind,names),reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;let active=reduced?stages.length-1:0;loader.innerHTML=`<div class="enso-stage"><div class="enso"><img src="/enso.png" alt="Consilium painted Enso"></div><div class="stage-title"></div><div class="stage-detail">CLIENT-VISIBLE WORKFLOW · NO HIDDEN MUTATION</div><div class="stage-list">${stages.map(stage=>`<div>${esc(stage)}</div>`).join('')}</div></div>`;const paint=()=>{const rows=$$('.stage-list div',loader);$('.stage-title',loader).textContent=reduced?'Request in progress; all client-known phases are listed.':stages[active];rows.forEach((row,index)=>{row.className=index<active||reduced?'complete':index===active?'active':'pending'});loader.dataset.stage=String(active)};loader.hidden=false;paint();const timer=reduced?null:setInterval(()=>{if(active<stages.length-1){active++;paint()}},600);try{return await work()}finally{if(timer)clearInterval(timer);loader.hidden=true}}
 
 function route(){const view=(location.hash.slice(1)||'today').split('/')[0];$$('.view').forEach(x=>x.classList.toggle('active',x.id===`view-${view}`));$$('nav a').forEach(x=>x.classList.toggle('active',x.dataset.view===view));$('#sidebar').classList.remove('open');}
-window.addEventListener('hashchange',route);route();
+window.addEventListener('hashchange',()=>{route();if(state)refresh().catch(error=>{console.error(error);flash(error.message)})});route();
 $$('[data-go]').forEach(b=>b.onclick=()=>location.hash=b.dataset.go);$('#menu').onclick=()=>$('#sidebar').classList.toggle('open');
 $$('[data-dialog]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.dialog).showModal());
 

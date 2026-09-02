@@ -42,3 +42,4 @@ if ! node scripts/hetzner-http-proof.mjs; then
   safe_log_tail
   exit 1
 fi
+node scripts/capture-pass9.mjs

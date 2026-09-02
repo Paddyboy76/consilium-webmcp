@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { DatabaseSync, type StatementSync } from 'node:sqlite';
 import { describe,expect,it } from 'vitest';
 import worker from '../worker/index';
-import { seedProduct } from '../worker/product';
+import { CAAR_FACT_TYPES, CANONICAL_CAAR, seedProduct } from '../worker/product';
 
 class Statement {
   private values:unknown[]=[];
@@ -36,6 +36,11 @@ describe('Pass 7 natural demo content',()=>{
     await seedProduct(d1 as never,'legacy');
     expect(db.prepare("SELECT title FROM missions WHERE id='legacy-physical-goal'").get()?.title).toBe('My own changed title');
     expect(db.prepare("SELECT title FROM missions WHERE id='legacy-financial-goal'").get()?.title).toBe('Cancel one subscription I don’t use');
+  });
+
+  it('reconciles only the known mislabelled reflection and preserves authored reflection text',async()=>{
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+    const db=migrated(),d1=new D1(db);db.exec("INSERT INTO users VALUES('demo-user','Maya Chen','2026-01-01'); INSERT INTO sessions VALUES('legacy','demo-user','2026-01-01','v2')");await seedProduct(d1 as never,'legacy');const canonical=JSON.parse(String(db.prepare("SELECT caar_json FROM nightly_reflections WHERE id='legacy-maya-nightly'").get()?.caar_json));expect(canonical).toEqual(CANONICAL_CAAR);expect((db.prepare("SELECT fact_type,fact_text,source_key FROM reflection_facts WHERE reflection_id='legacy-maya-nightly' ORDER BY source_key").all() as {fact_type:string;fact_text:string;source_key:string}[]).map(row=>row.fact_type)).toEqual([...CAAR_FACT_TYPES]);db.prepare("UPDATE nightly_reflections SET caar_json='{"+`"q1_today_intent":"My authored reflection stays"`+"}' WHERE id='legacy-maya-nightly'").run();await seedProduct(d1 as never,'legacy');expect(db.prepare("SELECT caar_json FROM nightly_reflections WHERE id='legacy-maya-nightly'").get()?.caar_json).toContain('My authored reflection stays');
   });
 
   it('explains dashboard counts and council members instead of showing unexplained metrics',()=>{
