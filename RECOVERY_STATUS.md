@@ -1,6 +1,35 @@
-# Recovery status — Pass 10 adversarial council release audit
+# Recovery status — Pass 11 production seed reconciliation release blocker
 
 Updated: 2026-09-02 UTC
+
+## Pass 11 result
+
+- Reproduced the production upgrade failure: `ensureSession()` treated any non-empty `demo-user` event corpus as fully seeded, so a Pass 5 database with 96 older events never received canonical rows added in Pass 8. The payload-only reconciliation could not repair IDs that did not exist, and reindexing correctly indexed that incomplete D1 corpus.
+- Added an always-safe canonical event reconciliation. Every session/seed pass inserts missing exact IDs from the current `buildSyntheticHistory()` as `demo-user`, `session_id=NULL`, with `synthetic-seed-v2` provenance. Only rows with an exact canonical ID, `demo-user` ownership, and that known synthetic provenance are updated to current canonical timestamps, types, subjects, valence, magnitude, and structured payload. No event is deleted; unrelated demo rows, user-authored rows, session records, and non-demo users are preserved.
+- Proved `evt-07-mum-call`, `evt-18-house`, `evt-20-depression`, `evt-21-house-finance`, and `evt-38-mum-missed` are restored on an established non-empty database and retain text, tags, area, relationship, goal link, author, outcome, and provenance. A second reconciliation creates no duplicates.
+- Corrected the canonical D1 loader to carry area, relationship, goal link, author, outcome, and provenance into production ingestion and retrieval. The authenticated local ingestion fixture proves every reconciled serious ID receives a personal vector manifest row under pipeline `0f7f47a4116e02d59f2622824e4535cda5c92ffa2eb0648deda04bd72309bed5`, while the appointed corpus remains exactly 18 chunks/vectors.
+- Added an established-database integration regression using the exact reported serious question. Its reconciled, non-pilot candidate set produces three non-empty, advisor-distinct personal lanes, three structured dual-grounded reports, a non-abstained decision, and no fallback. Count assertions are additive for personal history and exact only for the five required IDs and 18 advisor chunks.
+- The embedding model, Vectorize index/configuration, pipeline hash, source packs, public-domain provenance, six life areas, qualified slots, selected-vs-candidate trace, fail-closed validation/fallback, synthesis, CAAR handling, and proposal/commit boundary are unchanged.
+
+## Pass 11 verification
+
+- Focused upgrade/ingestion/consultation suite: `test/worker-seed.test.ts`, 9 tests pass.
+- `npm run check`: pass.
+- `npm test`: 16 files, 79 tests pass.
+- `npm run deploy:check`: production bundle dry-run passes; no deployment occurs.
+- No live Worker, Workers AI, Vectorize, D1, Cloudflare configuration, or OpenAI API was called or mutated.
+
+## Pass 11 Windows handoff
+
+From Windows PowerShell with OAuth:
+
+1. Deploy the final code with `npm run deploy:production`.
+2. Invoke one safe authenticated read such as `/api/context` to trigger canonical reconciliation; do not run a consultation yet.
+3. Temporarily enable the existing secret-gated ingestion endpoint and install its one-time secret, then invoke `/api/admin/ingest-vectors` once. Verify the five required personal canonical/vector records and exactly 18 advisor records under pipeline `0f7f47a4116e02d59f2622824e4535cda5c92ffa2eb0648deda04bd72309bed5`; treat the personal total as additive rather than fixed.
+4. Remove the ingestion secret, restore ingestion-disabled configuration, and redeploy.
+5. Rerun one authorized live consultation with the exact serious question and verify non-empty advisor-distinct personal lanes, dual grounding, and a non-abstained humane result.
+
+Do not deploy or perform the secret/reindex handoff from Debian.
 
 ## Pass 10 result
 
