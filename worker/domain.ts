@@ -1,23 +1,29 @@
 import type { AdvisorReport, EvidenceBundle, Pattern, SourceChunk, TimelineEvent } from './types';
 
 const isoDay = (offset:number) => new Date(Date.UTC(2026,7,1+offset,7,30)).toISOString();
-const event = (day:number, suffix:string, type:string, text:string, valence:'positive'|'negative'|'neutral', tags:string[], magnitude=1):TimelineEvent => ({id:`evt-${String(day).padStart(2,'0')}-${suffix}`,occurredAt:isoDay(day),type,subjectId:'goal-pilot',valence,magnitude,text,tags});
+const event = (day:number, suffix:string, type:string, text:string, valence:'positive'|'negative'|'neutral', tags:string[], magnitude=1,context:Partial<TimelineEvent>={}):TimelineEvent => ({id:`evt-${String(day).padStart(2,'0')}-${suffix}`,occurredAt:isoDay(day),type,subjectId:context.goalId??'goal-pilot',valence,magnitude,text,tags,author:'maya',provenance:'synthetic-pass8',...context});
 
 export function buildSyntheticHistory(variant:'baseline'|'adaptation-removed'|'irrelevant-added'='baseline'):TimelineEvent[] {
-  const rows:TimelineEvent[]=[];
-  for(let day=0;day<67;day++){
-    const morning=day%7<5;
-    rows.push(event(day,'energy','energy',morning?'Woke up feeling clear-headed and ready to work.':'My energy was less predictable over the weekend.','neutral',['energy',morning?'morning':'weekend'],.4));
-    if(day<28 && day%6===1) rows.push(event(day,'overload','friction','I gave myself five priorities and kept switching between them. I never got to the client outreach.','negative',['overload','four-plus-priorities','morning','pilot'],1));
-    if(day<28 && day%9===2) rows.push(event(day,'counter','outcome','I still contacted a potential client on a crowded day because their deadline made the conversation urgent.','positive',['overload','four-plus-priorities','counterexample','pilot'],.8));
-    if(day%10===3) rows.push(event(day,'reflection','reflection','I caught myself researching a new workshop idea instead of finishing the accessibility audit offer.','negative',['novelty','pilot'],.7));
-  }
+  const rows:TimelineEvent[]=[
+    event(2,'client-boundary','reflection','A client asked for another round just before lunch and I said yes before checking the week. My shoulders were tight by dinner, and Sam was quiet when I opened the laptop again.', 'negative',['client-work','boundary','overload'],1,{area:'vocational',relationship:'existing client and partner Sam',outcome:'Another evening of work displaced time with Sam.'}),
+    event(7,'mum-call','reflection','Mum asked three times whether the house had sold. I answered each time, but after the call I sat at the kitchen table and cried; I know it is the dementia, and it still hurts to lose the same piece of her again.','negative',['mum','dementia','house-sale','grief'],1,{area:'social',relationship:'mother',goalId:'goal-mum',outcome:'The call left Maya sad and depleted.'}),
+    event(12,'walk','outcome','I left my phone on the desk and walked for twenty minutes after lunch. I came back calmer and finished the client review.','positive',['walk','phone-away','calm','client-work'],1,{area:'physical',goalId:'goal-walk',outcome:'Calmer body and completed client review.'}),
+    event(18,'house','reflection','I opened the estate agent’s folder in Mum’s old bedroom and found her handwritten labels on the boxes. Choosing what to keep made the sale feel real, so I closed the folder without answering my brother’s question about the solicitor.','negative',['mum','house-sale','family','avoidance','grief'],1,{area:'spiritual',relationship:'mother and brother',goalId:'goal-house',outcome:'The solicitor question remained unanswered and family tension grew.'}),
+    event(24,'urgent-counter','outcome','A client needed an answer before noon, so I wrote the difficult boundary email first and sent it before opening Slack. They accepted the smaller scope without an argument.','positive',['client-work','boundary','urgency','counterexample','first-action'],.9,{area:'vocational',relationship:'existing client',outcome:'A protected first action contained the work.'}),
+    event(30,'subscription','outcome','The renewal email reminded me I had not opened the design app in two months. I cancelled it while the account page was open and felt relieved to close one ordinary loose end.','positive',['subscription','unused','cancelled','renewal'],.7,{area:'financial',goalId:'goal-subscription',outcome:'The unused renewal was cancelled.'}),
+    event(38,'mum-missed','reflection','I saw Mum’s missed-call notification when I closed the laptop after dinner. I love her, but I knew the house sale would probably come up and I did not feel strong enough tonight; letting it ring left me guilty.','negative',['mum','dementia','house-sale','missed-call','guilt'],1,{area:'social',relationship:'mother',goalId:'goal-mum',outcome:'Maya did not return the call that night.'}),
+    event(45,'priya-draft','reflection','Priya’s message was open on my screen all morning. I rewrote the website instead of pressing send because I was scared she would say no, and by the time client work began the draft was still unread by her.','negative',['priya','message','website','avoidance','rejection','pilot'],1,{area:'vocational',relationship:'warm potential client Priya',goalId:'goal-pilot',outcome:'The prepared message was not sent.'}),
+    event(52,'meaning','reflection','I agreed to extra client work before asking whether I wanted to give up another evening. I did not want them to think I was difficult, but it is not the kind of working life I am trying to build.','negative',['client-work','boundary','values','disappointing'],.9,{area:'spiritual',relationship:'existing client',outcome:'Work expanded into another evening.'}),
+    event(58,'focus','outcome','I put my phone in the hall and worked on the client review for forty minutes. The quiet helped; I finished the difficult section without bouncing back to messages.','positive',['phone-away','focus','client-work'],.8,{area:'mental',outcome:'Focused client work was completed.'})
+  ];
+  for(const day of [4,10,16,22])rows.push(event(day,'overload','friction','I put five things on the morning list, moved between neat little tasks, and reached client outreach with no time left. I felt busy but disappointed.','negative',['overload','four-plus-priorities','morning','pilot'],.8,{area:'mental',outcome:'The exposed outreach was deferred.'}));
+  for(const day of [26,28])rows.push(event(day,'counter','outcome','The list was crowded, but a real deadline made me send the exposed message first. I felt nervous and relieved when it was done.','positive',['overload','four-plus-priorities','counterexample','urgency','pilot'],.7,{area:'vocational',outcome:'Urgency helped Maya follow through despite overload.'}));
   rows.push(event(8,'rec-reject','recommendation','Consilium suggested contacting people after lunch. I rejected that because afternoons are usually full of client calls.','neutral',['recommendation','rejected','afternoon']));
   rows.push(event(14,'rec-fail','recommendation','I agreed to redo the whole website before contacting anyone.','neutral',['recommendation','accepted','redesign']));
   rows.push(event(17,'fail','outcome','The website redo became a much bigger job, and I did not contact any potential clients.','negative',['recommendation-outcome','failure','redesign','pilot'],1));
   rows.push(event(29,'adapt','adaptation','I changed the plan: before email, do one thing that puts the audit in front of a real person. The website can wait.','positive',['adaptation','morning','single-priority','pilot'],1));
   if(variant!=='adaptation-removed'){
-    for(const day of [31,36,43,50,58,64]) rows.push(event(day,'adapt-success','outcome','Before opening email, I finished the one client-outreach task I had chosen.','positive',['adaptation','morning','single-priority','success','pilot'],1));
+    for(const day of [31,36,43,50,58,64]) rows.push(event(day,'adapt-success','outcome','Before opening email, I finished the one client-outreach task I had chosen.','positive',['adaptation','morning','single-priority','success','pilot'],1,{area:'vocational',relationship:'potential clients',outcome:'The protected first action was completed.'}));
     rows.push(event(43,'rec-success','recommendation','I agreed to send the three messages I had already drafted before opening email.','neutral',['recommendation','accepted','single-priority']));
     rows.push(event(44,'reply','outcome','I sent all three messages. Two people replied that they wanted to hear more about the audit.','positive',['recommendation-outcome','success','pilot'],1));
   } else {
@@ -65,10 +71,17 @@ export const SOURCE_CHUNKS:SourceChunk[]=[
 ];
 
 export function buildEvidenceBundle(question:string,history:TimelineEvent[],appointed=['marcus-aurelius','epictetus','sun-tzu']):EvidenceBundle{
-  const patterns=inferPatterns(history),patternEvidence=new Set(patterns.flatMap(pattern=>[...pattern.supportingIds,...pattern.contradictoryIds]));
-  const relevant=history.filter(e=>e.tags.some(t=>['pilot','morning','single-priority','constraint','recommendation-outcome','adaptation'].includes(t))||patternEvidence.has(e.id));
-  const sourceByAdvisor=Object.fromEntries(appointed.slice(0,3).map(id=>[id,SOURCE_CHUNKS.filter(c=>c.advisorId===id)]));
-  return {question,goals:['Find three clients for Maya’s accessibility audit'],constraints:relevant.filter(e=>e.type==='constraint'),history:relevant,priorAdvice:history.filter(e=>e.type==='recommendation'),outcomes:history.filter(e=>e.type==='outcome'&&e.tags.includes('recommendation-outcome')),adaptations:history.filter(e=>e.type==='adaptation'),patterns,sourceByAdvisor};
+  const terms=new Set(question.toLowerCase().split(/\W+/).filter(word=>word.length>3));
+  const concerns=[...new Set(history.filter(event=>[event.text,...event.tags,event.area??'',event.relationship??''].some(value=>[...terms].some(term=>value.toLowerCase().includes(term)))).flatMap(event=>[event.area,...event.tags]).filter((x):x is string=>Boolean(x)))];
+  const score=(event:TimelineEvent)=>[event.text,...event.tags,event.area??'',event.relationship??'',event.outcome??''].reduce((n,value)=>n+[...terms].filter(term=>value.toLowerCase().includes(term)).length,0)+(event.tags.some(tag=>concerns.includes(tag))?2:0);
+  const ranked=[...history].map(event=>({event,score:score(event)})).filter(item=>item.score>0).sort((a,b)=>b.score-a.score||b.event.occurredAt.localeCompare(a.event.occurredAt));
+  const selected=new Map(ranked.slice(0,8).map(item=>[item.event.id,item.event]));
+  for(const item of ranked.slice(0,5)){for(const candidate of history)if(candidate.id!==item.event.id&&(candidate.goalId===item.event.goalId||candidate.relationship===item.event.relationship||candidate.tags.some(tag=>item.event.tags.includes(tag)))&&selected.size<12)selected.set(candidate.id,candidate)}
+  const relevant=[...selected.values()].sort((a,b)=>a.occurredAt.localeCompare(b.occurredAt));
+  const patterns=inferPatterns(history);
+  const sourceScore=(source:SourceChunk)=>[...terms].filter(term=>`${source.locator} ${source.text}`.toLowerCase().includes(term)).length+source.retrievalScore;
+  const sourceByAdvisor=Object.fromEntries(appointed.slice(0,3).map(id=>[id,SOURCE_CHUNKS.filter(c=>c.advisorId===id).sort((a,b)=>sourceScore(b)-sourceScore(a))]));
+  return {question,concerns,goals:['See whether a small accessibility-audit service is worth pursuing while serving existing clients','Stay connected to Mum while the family sells her house'],constraints:relevant.filter(e=>e.type==='constraint'),history:relevant,priorAdvice:history.filter(e=>e.type==='recommendation'&&selected.has(e.id)),outcomes:relevant.filter(e=>e.type==='outcome'),adaptations:relevant.filter(e=>e.type==='adaptation'),patterns,sourceByAdvisor};
 }
 
 const adviceByAdvisor:Record<string,{source:string;recommendation:string}>={
@@ -116,5 +129,6 @@ export function fixtureCouncilRun(bundle:EvidenceBundle){const reports=fixtureRe
 export function synthesize(bundle:EvidenceBundle,reports:AdvisorReport[]){
   const validated=reports.map(report=>({report,validation:validateReport(report,bundle)})).filter(x=>x.validation.valid&&!x.report.abstained);
   if(!validated.length) return {abstained:true,recommendation:'ABSTAIN',validatedReports:[],personalEvidenceIds:[],advisorEvidenceIds:[]};
-  return {abstained:false,recommendation:validated[0]?.report.recommendation??'ABSTAIN',validatedReports:validated.map(x=>x.report),personalEvidenceIds:[...new Set(validated.flatMap(x=>x.report.claims.flatMap(c=>c.personalEvidenceIds)))],advisorEvidenceIds:[...new Set(validated.flatMap(x=>x.report.claims.flatMap(c=>c.advisorEvidenceIds)))],uncertainty:'Councillors agree on action but emphasize different doctrine; outcome remains uncertain.'};
+  const recommendations=validated.map(x=>x.report.recommendation);
+  return {abstained:false,recommendation:`Consilium’s synthesis: ${recommendations.join(' ')}`,validatedReports:validated.map(x=>x.report),personalEvidenceIds:[...new Set(validated.flatMap(x=>x.report.claims.flatMap(c=>c.personalEvidenceIds)))],advisorEvidenceIds:[...new Set(validated.flatMap(x=>x.report.claims.flatMap(c=>c.advisorEvidenceIds)))],uncertainty:'The records support a pattern, not certainty about Maya’s motives or another person’s response.',disagreements:validated.map(x=>x.report.disagreement).filter(Boolean).join(' ')};
 }

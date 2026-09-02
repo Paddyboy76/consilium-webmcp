@@ -1,25 +1,29 @@
-# Recovery status — Pass 7
+# Recovery status — Pass 8
 
 Updated: 2026-09-02 UTC
 
-## Pass 7 result
+## Pass 8 result
 
-- Rewrote all 12 seeded goal/project titles and reasons, six recent updates, six linked reflections, the canonical 67-day history, pattern explanations, morning-brief fallback wording, deterministic council reports, and legacy Python fixture copy in a plain, specific voice for fictional demo person Maya Chen.
-- Added a seeded standalone journal entry and complete nightly-reflection chain: Maya describes avoiding a message to Priya by polishing her website, records her CAAR answers, names why she missed the goal, chooses a concrete change, and carries it into tomorrow’s directive.
-- Replaced unexplained dashboard counts with a navigable explanation of six goals for today and six longer-term projects. The six recent updates name their life area, goal, event, outcome, date, and record ID.
-- Introduced “Your council for this demo” in both UI and API. Marcus Aurelius, Epictetus, and Sun Tzu are named with their selected public-domain work, distinct perspective, and relevance to Maya’s current question. Canonical excerpts and provenance remain unchanged.
-- Added safe idempotent reconciliation. Session records change only when the canonical synthetic ID and complete known old title/reason or old reflection text match. Shared longitudinal records require the canonical IDs plus `synthetic-seed-v2`/`pattern-rules-v2` metadata. Arbitrary user text is not overwritten.
-- Preserved all 13 WebMCP contracts, six life areas, strict server-owned citations, reflection, brief, proposal/approval/commit/replay, trace flows, visual design, and Enso.
+- Maya remains explicitly synthetic, but the seed now follows one life: she is testing a small accessibility-audit service while serving existing clients; Priya’s short message stays unsent while Maya polishes the website; weak boundaries expand client work; phone-free walking and focus genuinely help; Mum’s dementia and the family-house sale carry love, repeated loss, guilt, memories, and family friction; one unused design-app renewal is simply cancelled.
+- All six areas contain asymmetric, ordinary first-person scenes with linked people, goals, bodily/emotional state, consequences, authorship, outcomes, and provenance. The cross-area inference is calibrated: exposing actions often yield to tidy low-risk work, while urgency and a protected first action are recorded counterevidence.
+- Replaced global newest-positive/newest-negative evidence with question-sensitive personal selection and linked context. Production now hydrates the actual top personal Vectorize matches from canonical D1 records and supplies exactly those records to the council. Indexed documents are versioned with area, relationship, linked goal, authorship, time, outcome, and provenance.
+- Removed fixed advisor-answer anchors. Advisor retrieval uses the actual question plus a bounded legitimate scope; passage relevance affects ordering. Stable prompt slots preserve server ownership of canonical IDs and hashes, and only explicitly selected slots are hydrated onto claims.
+- Upgraded the single bounded call to Cloudflare `@cf/meta/llama-3.3-70b-instruct-fp8-fast`, temperature 0.1, strict JSON mode, 25-second timeout, structural/semantic scope checks, and labelled deterministic fallback. No OpenAI provider was introduced.
+- The persisted reasoning record now separates remembered facts, interpretations, conflict/duties, unknowns, rejected inferences, advisor scope/application/limits/counsel/abstention, tensions, synthesis rationale, rejected alternative, clinical boundary, one immediate proposal, one follow-up, and the unchanged approval state.
+- Added an explicit imminent-risk pre-model gate that suppresses philosophical/productivity coaching and directs the person to immediate human support. Depression without imminent-risk wording receives a clinical boundary rather than a diagnosis or crisis claim.
+- Council UI now follows: What I remember / What may be happening / What I cannot know / The council / Where they differ / Consilium’s synthesis / One proposed next move / Evidence and trace. Technical IDs, providers, locators, and hashes remain secondary and expandable.
 
 ## Verification
 
-- Focused Pass 7, domain, Worker-seed, and UI tests pass.
-- Desktop and mobile browser captures passed with no console/page errors or horizontal overflow:
-  - `artifacts/pass7/01-desktop-natural-goals-history.png`
-  - `artifacts/pass7/02-mobile-natural-journal-history.png`
-- The final full `npm run check`, `npm test`, and `npm run deploy:check -- --config wrangler.production.jsonc` are recorded after the last code change.
-- No live Workers AI call, remote Cloudflare mutation, D1 migration application, or deployment was made from Debian.
+- `npm run check`: pass.
+- `npm test`: 15 files, 69 tests pass, including Pass 8 continuity, six-area reflection quality, query-sensitive evidence, advisor scope, slot ownership, model schema, and imminent-risk routing.
+- `npm run deploy:check`: production bundle succeeds; no deployment occurs.
+- Desktop/mobile browser capture passes with no horizontal overflow:
+  - `artifacts/pass8/01-desktop-serious-council.png`
+  - `artifacts/pass8/02-mobile-journal.png`
+  - `artifacts/pass8/03-desktop-today.png`
+- No live Workers AI call, remote Vectorize/D1 mutation, or Debian deployment was made.
 
 ## Windows OAuth deployment handoff
 
-Deploy the clean committed `main` using `wrangler.production.jsonc`. Runtime reconciliation upgrades existing canonical demo sessions on their next product/context request without disturbing user-authored content. Then run the bounded production proof described in the Pass 6 handoff; its strict `workers-ai-structured` and retrieval-owned citation requirements are unchanged.
+Deploy clean `main` with `wrangler.production.jsonc`. The new pipeline hash is `0f7f47a4116e02d59f2622824e4535cda5c92ffa2eb0648deda04bd72309bed5`; re-run the authenticated vector ingestion so personal documents use the enriched Pass 8 canonical form before production consultations. Then run the bounded production proof and verify `workers-ai-structured`, exact D1 hydration of the personal retrieval trace, per-advisor source slots, and persisted validation records.

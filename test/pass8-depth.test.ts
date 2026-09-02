@@ -1,0 +1,13 @@
+import {describe,expect,it} from 'vitest';
+import {buildEvidenceBundle,buildSyntheticHistory,synthesize} from '../worker/domain';
+import {bestSources,selectPersonalEvidence} from '../worker/model';
+import {imminentRisk} from '../worker/index';
+
+describe('Pass 8 human continuity and council depth',()=>{
+ it('keeps the concrete cross-area story coherent',()=>{const h=buildSyntheticHistory(),joined=h.map(x=>`${x.area} ${x.relationship} ${x.text} ${x.outcome}`).join(' ');for(const terms of [/vocational.*Priya.*message.*website.*scared/i,/social.*mother.*house.*cried.*dementia/i,/client.*said yes.*shoulders.*evening/i,/physical.*phone.*walked.*calmer.*finished/i,/financial.*renewal.*two months.*cancelled/i])expect(joined).toMatch(terms);expect(h.every(x=>x.author==='maya')).toBe(true)});
+ it('contains ordinary scene, feeling or body, context, and consequence across all six areas',()=>{const h=buildSyntheticHistory();for(const area of ['physical','mental','spiritual','social','financial','vocational']){const rows=h.filter(x=>x.area===area);expect(rows.length,area).toBeGreaterThan(0);expect(rows.some(x=>/I |my |Mum|Priya/i.test(x.text)&&Boolean(x.outcome)),area).toBe(true)}expect(h.map(x=>x.text).join(' ')).not.toMatch(/pilot invitation|evidence-led|fixture|test record|coverage/i)});
+ it('does not leak pilot-only context into a Mum and house-sale question',()=>{const b=buildEvidenceBundle('Mum dementia house sale guilt',buildSyntheticHistory());expect(b.history.some(x=>x.tags.includes('mum'))).toBe(true);expect(b.history[0]?.text).not.toContain('pilot invitation')});
+ it('selects advisor evidence by the actual question and keeps Sun Tzu on conditions',()=>{const b=buildEvidenceBundle('Mum dementia house sale depression workload',buildSyntheticHistory());const sun=selectPersonalEvidence(b,'sun-tzu');expect(sun.some(x=>/work|client|capacity|focus/i.test(`${x.text} ${x.outcome}`))).toBe(true);const irrelevant={...b.sourceByAdvisor['sun-tzu']![0]!,id:'keyword-trap',text:'Depression grief dementia mother',retrievalScore:.99};expect(bestSources('fight conditions',[irrelevant,...b.sourceByAdvisor['sun-tzu']!])[0]?.id).not.toBe('keyword-trap')});
+ it('synthesizes the whole validated council rather than returning advisor one',()=>{const b=buildEvidenceBundle('Priya website message',buildSyntheticHistory()),reports=[] as never[];expect(synthesize(b,reports).abstained).toBe(true)});
+ it('routes only explicit imminent danger to the deterministic gate',()=>{expect(imminentRisk('I have depression and work feels overwhelming')).toBe(false);expect(imminentRisk('I cannot stay safe and may hurt myself')).toBe(true)});
+});

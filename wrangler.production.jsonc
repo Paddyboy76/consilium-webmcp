@@ -17,8 +17,8 @@
   "ai": { "binding": "AI" },
   "vars": {
     "APP_MODE": "cloudflare",
-    "MODEL_CONFIG_VERSION": "workers-ai-json-council-v3-retrieval-owned-evidence",
-    "PIPELINE_VERSION": "1f5efdc1c1ef895b221f8dba3ab9c6b64139eb4265eb33a154ba560aa761109f",
+    "MODEL_CONFIG_VERSION": "workers-ai-json-council-v4-human-depth-evidence-slots",
+    "PIPELINE_VERSION": "0f7f47a4116e02d59f2622824e4535cda5c92ffa2eb0648deda04bd72309bed5",
     "CONSULTATION_LIMIT_PER_HOUR": "6",
     "SESSION_KEY_VERSION": "k1",
     "INGESTION_ENABLED": "false"
