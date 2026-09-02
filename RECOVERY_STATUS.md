@@ -1,6 +1,37 @@
-# Recovery status — Pass 13 structured Workers AI interactive latency gate
+# Recovery status — Pass 14 reliable interactive structured model
 
 Updated: 2026-09-02 UTC
+
+## Pass 14 result
+
+- Pass 13 is deployed as Cloudflare Worker version `81958600-fefd-4244-9c3d-63d3d1c9ba57`. Exactly one serious live WebMCP consultation was attempted after deployment and was not retried when the browser bridge exceeded its execution window. Production D1 audit row `trace-49a0295c-5417-41ef-942f-8e6b8824b5a7` proves `modelMode=deterministic-fallback`, `fallbackReason=AI_TIMEOUT`, `modelElapsedMs=21000`, and `persistentMutation=false`.
+- Only council inference changes to `@cf/meta/llama-3.1-8b-instruct-fast`, under model config `workers-ai-json-council-v6-fast-interactive`. Cloudflare’s official model catalogue describes it as the fast Llama 3.1 variant with a 128,000-token context window, the JSON Mode documentation lists it as supporting JSON Schema structured output, and the current model catalogue continues to list it as active. This addresses the measured interactive latency failure without weakening retrieval, reasoning, provenance, validation, or fallback.
+- The single-call contract remains temperature 0.1, strict `response_format.type=json_schema`, and 1,600 output tokens. The complete serialized fixture still proves at least 25% output margin. The application timeout is now 15,000 ms, leaving substantially more browser-bridge margin; it is not increased or retried.
+- The full record is unchanged: situation summary, remembered facts, interpretations, central conflict, competing duties, unknowns, rejected inferences, three advisor reports, tensions, synthesis, one immediate action, one follow-up, and explicit unapproved status. Server-owned advisor-qualified slots, advisor-distinct best-four personal lanes, best-two appointed passages with locators, counterevidence, candidate-vs-selected trace, fail-closed lane ownership, Sun Tzu’s clinical boundary, dual grounding, and deterministic fallback remain intact.
+- JSON Schema now advertises the same advisor limits as Zod: `personalSlots` maximum four, `counterPersonalSlots` maximum two, and `sourceSlots` maximum two. Workers AI response bodies are accepted only as an object or as a JSON string parsed in full; prose and brace-substring extraction are never accepted. Both forms pass through the same strict Zod, hydration, slot, scope, and semantic validation.
+- Returned and audited safe diagnostics now include the exact model identifier and model-config version alongside bounded mode, reason, elapsed time, and `persistentMutation=false`. Raw prompts, model prose outside the validated body, exception text, credentials, and secrets are not audited. Structured success and fallback both leave actions and proposals unchanged.
+- No D1 migration or Vectorize reindex is required. The embedding model, 768 dimensions, pipeline hash, canonical corpus, retrieval configuration, and storage schema are unchanged.
+
+Official rationale: [fast model catalogue](https://developers.cloudflare.com/ai/models/%40cf/meta/llama-3.1-8b-instruct-fast/), [Workers AI JSON Mode](https://developers.cloudflare.com/workers-ai/features/json-mode/), and [active model catalogue](https://developers.cloudflare.com/workers-ai/models/).
+
+## Pass 14 verification
+
+- Focused model and established-production/consultation suite: `test/model.test.ts` plus `test/worker-seed.test.ts`, 19 tests pass.
+- `npm run check`: pass.
+- `npm test`: pass.
+- `npm run deploy:check`: production bundle dry-run passes; no deployment occurs.
+- No live Worker, Workers AI, Vectorize, D1, Cloudflare configuration, deployment, or OpenAI API was called or mutated.
+
+## Pass 14 Windows handoff
+
+From Windows PowerShell with OAuth:
+
+1. Deploy the final Pass 14 code with `npm run deploy:production`. Do not run a migration or vector reindex.
+2. Run at most one explicitly authorized serious live WebMCP consultation using the established question.
+3. Inspect the returned response and `webmcp_calls.result_json`. Verify model `@cf/meta/llama-3.1-8b-instruct-fast`, config `workers-ai-json-council-v6-fast-interactive`, `modelMode`, bounded `fallbackReason`, `modelElapsedMs`, advisor-distinct capped lanes, canonical dual grounding, and `persistentMutation=false`.
+4. Confirm no action or proposal was created. Do not retry merely to diagnose a timeout or model failure; use the safe persisted diagnostics.
+
+Do not reindex, run a migration, enable ingestion, or deploy from Debian.
 
 ## Pass 13 result
 
