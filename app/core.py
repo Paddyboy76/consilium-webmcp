@@ -98,9 +98,9 @@ def consult_council(question, session_id="demo"):
     memory_ids = [m["id"] for m in memory]
     reports = []
     recommendations = {
-        "advisor-drucker": "Make pilot outreach the single contribution for this block; defer lower-leverage activity.",
-        "advisor-newport": "Protect one 45-minute block: send the prepared invitations before opening email or redesigning anything.",
-        "advisor-lean": "Send three pilot invitations now; replies create real evidence about demand and unblock the launch decision.",
+        "advisor-drucker": "Use this block for the contribution that matters most: ask potential clients about the audit.",
+        "advisor-newport": "Use one quiet 45-minute block to send the prepared messages before opening email or touching the website.",
+        "advisor-lean": "Send three messages now. Their replies will tell Maya more about demand than another round of preparation.",
     }
     for advisor in ADVISORS:
         sources = advisor_sources(advisor["id"])
@@ -115,13 +115,13 @@ def consult_council(question, session_id="demo"):
     decision = {
         "trace_id": trace_id,
         "selected_advisors": [{"advisor_id": a["id"], "advisor_name": a["name"], "why": a["focus"]} for a in ADVISORS],
-        "consensus": "Use the 45 minutes for one externally validating launch action.",
+        "consensus": "Use the 45 minutes to send the messages Maya has already prepared.",
         "disagreements": ["Effectiveness emphasizes contribution; Lean emphasizes learning. Both point to the same action."],
         "personal_memory_evidence": memory[:4],
         "advisor_source_evidence": SOURCES,
         "advisor_reports": reports,
-        "recommendation": "Before opening email, spend the full 45 minutes sending three prepared accessibility-pilot invitations. Do not redesign the site.",
-        "proposed_next_action": "Send three accessibility-pilot invitations in a protected 45-minute block.",
+        "recommendation": "Before opening email, send the three prepared messages about the accessibility audit. Leave the website alone for now.",
+        "proposed_next_action": "Send the three prepared accessibility-audit messages before opening email.",
         "uncertainty": "This is evidence-bounded advice from a small synthetic history, not a guarantee.",
         "validation": {"citation_guardrail": "passed", "prompt_injection": "treated_as_untrusted_data", "persistent_mutation": False},
         "engine": "deterministic_demo",

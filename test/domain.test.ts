@@ -28,7 +28,7 @@ describe('longitudinal intelligence',()=>{
     const changedBundle=buildEvidenceBundle(question,buildSyntheticHistory('adaptation-removed'));
     const changed=synthesize(changedBundle,fixtureReports(changedBundle));
     expect(changed.recommendation).not.toBe(normal.recommendation);
-    expect(changed.recommendation).toContain('rebuild');
+    expect(changed.recommendation).toContain('protecting one short task');
   });
 
   it('does not change advice for irrelevant memory',()=>{
