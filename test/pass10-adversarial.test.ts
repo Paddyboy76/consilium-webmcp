@@ -10,7 +10,7 @@ describe('Pass 10 adversarial release invariants',()=>{
     const family=laneIds('Mum dementia house sale depression workload'),vocational=laneIds('Priya website message client workload');
     expect(family).toEqual({
       'marcus-aurelius':['evt-38-mum-missed','evt-21-house-finance','evt-07-mum-call','evt-18-house'],
-      epictetus:['evt-38-mum-missed','evt-07-mum-call','evt-18-house','evt-20-depression','evt-24-urgent-counter'],
+      epictetus:['evt-38-mum-missed','evt-07-mum-call','evt-18-house','evt-20-depression'],
       'sun-tzu':['evt-20-depression','evt-24-urgent-counter']
     });
     expect(new Set(Object.values(family).map(ids=>ids.join('|'))).size).toBe(3);
@@ -18,7 +18,7 @@ describe('Pass 10 adversarial release invariants',()=>{
     expect(vocational).toEqual({
       'marcus-aurelius':['evt-45-priya-draft','evt-58-focus','evt-52-meaning'],
       epictetus:['evt-45-priya-draft','evt-17-fail','evt-24-urgent-counter'],
-      'sun-tzu':['evt-45-priya-draft','evt-58-focus','evt-17-fail','evt-64-adapt-success','evt-58-adapt-success','evt-24-urgent-counter']
+      'sun-tzu':['evt-45-priya-draft','evt-58-focus','evt-17-fail','evt-64-adapt-success']
     });
   });
 

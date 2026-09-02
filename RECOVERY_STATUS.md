@@ -1,6 +1,35 @@
-# Recovery status — Pass 12 production embedding batch release blocker
+# Recovery status — Pass 13 structured Workers AI interactive latency gate
 
 Updated: 2026-09-02 UTC
+
+## Pass 13 result
+
+- Pass 12 deployed, the corrected production reindex completed with exactly 114 personal and 18 advisor vectors under pipeline `0f7f47a4116e02d59f2622824e4535cda5c92ffa2eb0648deda04bd72309bed5`, and the five serious family IDs have canonical `vec-<id>` rows. The maintenance secret was removed, ingestion is disabled, and only `SESSION_SIGNING_KEY` remains.
+- The exact serious WebMCP consultation retrieved the intended non-pilot evidence and persisted three valid, non-abstained, dual-source fallback reports. Audit trace `trace-7961f0ba-d5e8-4ab9-954d-ef95d23f2177` recorded `modelMode=deterministic-fallback`; the browser bridge ended at roughly 29 seconds. This timing is consistent with the former 25-second application race plus overhead and strongly suggests `AI_TIMEOUT`, but Pass 12 did not persist `fallbackReason`, so the cause is not claimed as proven.
+- The primary remains `@cf/meta/llama-3.3-70b-instruct-fp8-fast` at temperature 0.1 with strict JSON Schema, advisor-qualified server-owned slots, full reasoning/synthesis fields, hydration, semantic validation, and validated deterministic fallback. No smaller model or alternate provider was introduced.
+- Each advisor prompt lane now contains its scope-ranked best four canonical personal events and best two appointed-book passages. The full shared history is not repeated in the prompt. Candidate-vs-selected retrieval remains exact, selected lanes remain advisor-distinct, and a bounded `counterPersonalSlots` field preserves relevant contrary evidence using only the same server-owned personal lane.
+- `max_tokens` is 1,600. The focused contract test serializes the complete fixture output and schema, applies a conservative four-characters-per-token estimate, and proves at least 25% output margin while hydrating every required field. The application timeout is 21,000 ms, leaving roughly nine seconds inside the 30-second browser/WebMCP envelope for retrieval, persistence, serialization, transport, and rendering; the timeout is injectable for a millisecond-scale regression.
+- The response and `webmcp_calls.result_json` now carry `modelMode`, `fallbackReason` (or null), and `modelElapsedMs` for the council model attempt. Persisted reasons are bounded operational codes (`AI_TIMEOUT`, JSON-schema invalid, evidence-slot invalid, semantic-validation invalid, or model-call failed); raw exception text, prompts, and secrets are never audited.
+- Consultation remains audit-only with respect to plans: tests prove no action or proposal mutation on structured success or fallback. The 114-record reconciliation, chunked embeddings, pipeline/version, six life areas, serious scopes, fail-closed evidence ownership, synthesis, and all 13 WebMCP lifecycle tools are unchanged. No migration or vector reindex is required.
+
+## Pass 13 verification
+
+- Focused model and established-production/consultation suite: `test/model.test.ts` plus `test/worker-seed.test.ts`, 17 tests pass.
+- `npm run check`: pass.
+- `npm test`: 16 files, 82 tests pass.
+- `npm run deploy:check`: production bundle dry-run passes; no deployment occurs.
+- No live Worker, Workers AI, Vectorize, D1, Cloudflare configuration, deployment, or OpenAI API was called or mutated.
+
+## Pass 13 Windows handoff
+
+From Windows PowerShell with OAuth:
+
+1. Deploy the final Pass 13 code with `npm run deploy:production`. No migration or reindex is needed.
+2. Run exactly one serious live WebMCP consultation using the established question.
+3. Inspect both the returned response and audited `webmcp_calls.result_json`: verify `modelMode`, `fallbackReason`, and `modelElapsedMs`; confirm advisor-distinct capped selected lanes, the five serious family records across candidate/selected evidence as relevant, canonical dual grounding, a humane non-abstained result, and `persistentMutation=false`.
+4. Confirm no action or proposal was created. Do not repeat the live call merely to diagnose a failure; use the persisted reason and elapsed time.
+
+Do not reindex, run a migration, enable ingestion, or deploy from Debian.
 
 ## Pass 12 result
 
