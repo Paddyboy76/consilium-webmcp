@@ -1,6 +1,36 @@
-# Recovery status — Pass 11 production seed reconciliation release blocker
+# Recovery status — Pass 12 production embedding batch release blocker
 
 Updated: 2026-09-02 UTC
+
+## Pass 12 result
+
+- Pass 11 deployed and safely reconciled the established production D1 corpus from 96 to 114 synthetic personal events, including `evt-07-mum-call`, `evt-18-house`, `evt-20-depression`, `evt-21-house-finance`, and `evt-38-mum-missed`. The authenticated reindex then returned `INTERNAL_ERROR`; the maintenance secret was removed and `INGESTION_ENABLED=false` was restored.
+- The exact cause was local and deterministic: `WorkersAiEmbedder.embedMany()` rejected more than 100 texts with `INVALID_EMBEDDING_BATCH`, while `ingestProductionVectors()` supplied all 114 personal texts in one call.
+- Production batch embedding now accepts a bounded total of 1,000 texts, preserves all existing empty/text-length/model/dimension/invalid-response guards, splits inputs into stable ordered chunks of at most 100, validates the returned row count and all 768 dimensions for every chunk, and concatenates without retries or sampling. `embed(text)` is unchanged.
+- A focused regression proves 114 inputs use exactly two binding calls of 100 and 14, preserve output length and order, and fail closed when the second chunk is malformed. The established-production integration constructs the exact additive 114-personal + 18-advisor union, proves every personal event has one manifest row, advisor rows remain exactly 18, and no Workers AI embedding call exceeds 100 texts.
+- Idempotent authenticated reruns retain canonical `vec-<id>` identifiers and the existing D1 `INSERT OR REPLACE`; counts remain 114 personal and 18 advisor, with no duplicate, deletion, or unrelated-record rewrite.
+- The embedding model, 768 dimensions, Vectorize metadata/filter schema, pipeline hash, Pass 11 reconciliation, Pass 10 council safeguards, six life areas, and all 13 WebMCP lifecycle tools are unchanged.
+
+## Pass 12 verification
+
+- Focused embedding and established-production suite: `test/retrieval.test.ts` plus `test/worker-seed.test.ts`, 14 tests pass.
+- `npm run check`: pass.
+- `npm test`: 16 files, 80 tests pass.
+- `npm run deploy:check`: production bundle dry-run passes; no deployment occurs.
+- No live Worker, Workers AI, Vectorize, D1, Cloudflare configuration, deployment, or OpenAI API was called or mutated.
+
+## Pass 12 Windows handoff
+
+From Windows PowerShell with OAuth:
+
+1. Deploy the Pass 12 code with `npm run deploy:production`.
+2. Trigger safe canonical reconciliation with one authenticated read such as `/api/context`; do not run a consultation yet.
+3. Temporarily enable the existing secret-gated ingestion endpoint and install a one-time secret.
+4. Invoke `/api/admin/ingest-vectors` once. Verify exactly 114 personal and 18 advisor manifest rows under pipeline `0f7f47a4116e02d59f2622824e4535cda5c92ffa2eb0648deda04bd72309bed5`, and verify all five required IDs have canonical `vec-<id>` rows.
+5. Delete the ingestion secret, restore `INGESTION_ENABLED=false`, and redeploy the disabled configuration.
+6. Rerun the serious live council gate with the exact established question and verify non-empty advisor-distinct personal lanes, dual grounding, no fallback, and a non-abstained humane result.
+
+Do not deploy or perform the secret/reindex handoff from Debian.
 
 ## Pass 11 result
 

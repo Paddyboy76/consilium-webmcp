@@ -1,5 +1,8 @@
 export const EMBEDDING_MODEL='@cf/baai/bge-base-en-v1.5';
 export const EMBEDDING_DIMENSIONS=768;
+export const EMBEDDING_REQUEST_BATCH_SIZE=100;
+// Production ingestion is intentionally bounded even though each Workers AI request is chunked.
+export const MAX_EMBEDDING_BATCH_SIZE=1000;
 export const MAX_FILTER_BYTES=1800;
 export const VECTOR_PIPELINE_VERSION='bge768-v2';
 
@@ -21,8 +24,8 @@ const embeddingFrom=(value:unknown)=>{
   if(!value||typeof value!=='object'||!('data' in value)||!Array.isArray(value.data)||!Array.isArray(value.data[0])||!value.data[0].every((item:unknown)=>typeof item==='number'))throw new Error('INVALID_EMBEDDING_RESPONSE');
   const vector=value.data[0];if(vector.length!==EMBEDDING_DIMENSIONS)throw new Error('INVALID_EMBEDDING_DIMENSIONS');return vector;
 };
-const embeddingsFrom=(value:unknown)=>{
-  if(!value||typeof value!=='object'||!('data' in value)||!Array.isArray(value.data)||!value.data.every(row=>Array.isArray(row)&&row.length===EMBEDDING_DIMENSIONS&&row.every((item:unknown)=>typeof item==='number')))throw new Error('INVALID_EMBEDDING_RESPONSE');
+const embeddingsFrom=(value:unknown,expectedRows:number)=>{
+  if(!value||typeof value!=='object'||!('data' in value)||!Array.isArray(value.data)||value.data.length!==expectedRows||!value.data.every(row=>Array.isArray(row)&&row.length===EMBEDDING_DIMENSIONS&&row.every((item:unknown)=>typeof item==='number')))throw new Error('INVALID_EMBEDDING_RESPONSE');
   return value.data as number[][];
 };
 
@@ -30,7 +33,12 @@ export class WorkersAiEmbedder implements Embedder {
   readonly kind='workers-ai-production' as const;readonly dimensions=EMBEDDING_DIMENSIONS;
   constructor(private readonly ai:WorkersAiBinding){}
   async embed(text:string){if(!text||text.length>4000)throw new Error('INVALID_EMBEDDING_INPUT');return embeddingFrom(await this.ai.run(EMBEDDING_MODEL,{text:[text]}))}
-  async embedMany(texts:string[]){if(!texts.length||texts.length>100||texts.some(text=>!text||text.length>4000))throw new Error('INVALID_EMBEDDING_BATCH');return embeddingsFrom(await this.ai.run(EMBEDDING_MODEL,{text:texts}))}
+  async embedMany(texts:string[]){
+    if(!texts.length||texts.length>MAX_EMBEDDING_BATCH_SIZE||texts.some(text=>!text||text.length>4000))throw new Error('INVALID_EMBEDDING_BATCH');
+    const vectors:number[][]=[];
+    for(let start=0;start<texts.length;start+=EMBEDDING_REQUEST_BATCH_SIZE){const chunk=texts.slice(start,start+EMBEDDING_REQUEST_BATCH_SIZE);vectors.push(...embeddingsFrom(await this.ai.run(EMBEDDING_MODEL,{text:chunk}),chunk.length))}
+    return vectors;
+  }
 }
 
 export class DeterministicFixtureEmbedder implements Embedder {

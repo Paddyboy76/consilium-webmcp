@@ -10,5 +10,13 @@ describe('retrieval lane isolation',()=>{
   it('filters personal retrieval before nearest-neighbor selection',async()=>{const index=new CapturingIndex();await retrievePersonal(index,[.1],'demo-user');expect(index.calls[0]).toEqual({topK:8,returnMetadata:'all',filter:{corpus_kind:'personal',user_id:'demo-user',pipeline_version:'bge768-v2'}})});
   it('filters advisor retrieval by both advisor and appointed pack version',async()=>{const index=new CapturingIndex();await retrieveAdvisor(index,[.1],'epictetus','pg10661-v1');expect(index.calls[0]).toEqual({topK:6,returnMetadata:'all',filter:{corpus_kind:'advisor',advisor_id:'epictetus',pack_version:'pg10661-v1',pipeline_version:'bge768-v2'}})});
   it('uses Workers AI 768-dimensional production embeddings',async()=>{let called='';const embedder=new WorkersAiEmbedder({run:(model)=>{called=model;return Promise.resolve({data:[Array(768).fill(.1)]})}});expect((await embedder.embed('bounded text')).length).toBe(EMBEDDING_DIMENSIONS);expect(called).toBe(EMBEDDING_MODEL);expect(embedder.kind).toBe('workers-ai-production')});
+  it('chunks 114 production embeddings in order and fails closed on a malformed second chunk',async()=>{
+    const texts=Array.from({length:114},(_,index)=>`text-${index}`),calls:string[][]=[];
+    const ai={run:(_model:typeof EMBEDDING_MODEL,input:{text:string[]})=>{calls.push(input.text);return Promise.resolve({data:input.text.map(text=>{const vector=Array.from<number>({length:EMBEDDING_DIMENSIONS}).fill(0);vector[0]=Number(text.split('-')[1]);return vector})})}};
+    const vectors=await new WorkersAiEmbedder(ai).embedMany(texts);
+    expect(calls).toHaveLength(2);expect(calls.every(call=>call.length<=100)).toBe(true);expect(calls.map(call=>call.length)).toEqual([100,14]);expect(vectors).toHaveLength(114);expect(vectors.map(vector=>vector[0])).toEqual(Array.from({length:114},(_,index)=>index));
+    let chunk=0;const malformed=new WorkersAiEmbedder({run:(_model,input)=>{chunk++;return Promise.resolve({data:input.text.map(()=>Array.from<number>({length:chunk===2?767:EMBEDDING_DIMENSIONS}).fill(.1))})}});
+    await expect(malformed.embedMany(texts)).rejects.toThrow('INVALID_EMBEDDING_RESPONSE');expect(chunk).toBe(2);
+  });
   it('labels deterministic vectors as test fixtures',async()=>{const fixture=new DeterministicFixtureEmbedder();expect(fixture.kind).toBe('deterministic-test-fixture');expect((await fixture.embed('test')).length).toBe(768)});
 });
