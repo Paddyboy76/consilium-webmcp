@@ -17,7 +17,7 @@
   "ai": { "binding": "AI" },
   "vars": {
     "APP_MODE": "cloudflare",
-    "MODEL_CONFIG_VERSION": "workers-ai-json-council-v6-fast-interactive",
+    "MODEL_CONFIG_VERSION": "workers-ai-json-council-v7-gpt-oss-interactive",
     "PIPELINE_VERSION": "0f7f47a4116e02d59f2622824e4535cda5c92ffa2eb0648deda04bd72309bed5",
     "CONSULTATION_LIMIT_PER_HOUR": "6",
     "SESSION_KEY_VERSION": "k1",

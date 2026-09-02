@@ -1,6 +1,25 @@
-# Recovery status — Pass 14 reliable interactive structured model
+# Recovery status — Pass 15 Cloudflare-hosted OpenAI structured council
 
 Updated: 2026-09-02 UTC
+
+## Pass 15 result
+
+- Pass 14 is deployed as Cloudflare Worker version `5faff90a-47b2-4edc-83b9-38c2f9e655e3`. Exactly one serious live WebMCP consultation completed end to end in 23,184 ms. Trace `trace-99f5b746-d2b4-48a6-bf0f-197836d98f4a` proves model `@cf/meta/llama-3.1-8b-instruct-fast`, config `workers-ai-json-council-v6-fast-interactive`, `modelMode=deterministic-fallback`, `fallbackReason=AI_JSON_SCHEMA_INVALID`, `modelElapsedMs=11229`, `validation.valid=true`, `dualGrounded=true`, and `persistent_mutation=false`. The humane grounded fallback and 11,229 ms attempt prove the Pass 14 latency correction; schema conformance is the remaining primary-path defect.
+- Only council inference changes to Cloudflare Workers AI `@cf/openai/gpt-oss-20b`, under `workers-ai-json-council-v7-gpt-oss-interactive`. Cloudflare describes it as a Cloudflare-hosted OpenAI open-weight reasoning model intended for lower latency, with a 128,000-token context window and `response_format`. It uses the existing Workers AI binding and no OpenAI API, SDK, separate provider key, or `OPENAI_API_KEY` path. This is the final interactive interpreter choice because it directly targets structured reasoning while retaining the already-proven interactive envelope.
+- The one-call contract remains temperature 0.1, strict JSON Schema, 1,600 output tokens, and a 15,000 ms application timeout. There is no retry, cascade, or timeout increase. Server-owned qualified slots, full hydration, semantic validation, deterministic fallback, and every Pass 10–14 reasoning, clinical, provenance, evidence-lane, counterevidence, and no-plan-mutation protection remain intact.
+- Object and whole-body JSON-string responses still normalize through the identical full schema and hydration path; prose and brace-substring extraction remain forbidden. Zod failures now return and audit at most the first eight issue paths and codes, without values or messages. Whole-body parse failure uses only `response_body`/`invalid_json`; other failures expose no arbitrary exception text. Prompts, model prose, private journal text beyond authorized consultation storage, credentials, and secrets are never diagnostic fields.
+- Focused tests cover the exact model/config, strict `response_format`, unchanged timeout/token ceiling, full schema/hydration, object/string normalization, bounded malformed-schema and parse diagnostics, and zero action/proposal mutation on structured success and fallback.
+- No D1 migration or Vectorize reindex is required. Storage schema, embedding model, 768 dimensions, pipeline hash, canonical corpus, and retrieval configuration are unchanged.
+
+Official rationale: [GPT-OSS 20B model page](https://developers.cloudflare.com/workers-ai/models/gpt-oss-20b/), [Workers AI JSON Mode](https://developers.cloudflare.com/workers-ai/features/json-mode/).
+
+## Pass 15 verification
+
+- Focused model and established consultation suite: `test/model.test.ts` plus `test/worker-seed.test.ts`, 21 tests pass.
+- `npm run check`: pass.
+- `npm test`: 16 files, 86 tests pass.
+- `npm run deploy:check`: production bundle dry-run passes with Wrangler logging redirected to `/tmp` because the Debian home config path is read-only; no deployment occurs.
+- No live Worker, Workers AI, OpenAI API, Vectorize, D1, Cloudflare configuration, or deployment is called or mutated from Debian.
 
 ## Pass 14 result
 
