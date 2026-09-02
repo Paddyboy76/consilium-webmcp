@@ -1,51 +1,76 @@
-# Devpost submission draft
+# Devpost-ready submission copy
 
 ## Project title
+
 Consilium — Persistent intelligence for your life
 
 ## Tagline
-One human. One sovereign memory. Many evidence-backed agents.
+
+One human. One sovereign memory. Many evidence-backed councillors.
 
 ## Short description
-Consilium lets a human’s chosen browser agent collaborate with a persistent, evidence-bounded council through WebMCP—connecting lived history to specialist knowledge while keeping every write under explicit human control.
+
+Consilium lets a person's chosen browser agent collaborate with a persistent, evidence-bounded council through WebMCP—connecting lived history to appointed source knowledge while keeping every persistent action under explicit human control.
 
 ## Inspiration
-General assistants are powerful but episodic. They repeatedly reconstruct the person, lose decision history, and mix advice with action. We wanted persistent intelligence that belongs to the human, not to one chat session.
+
+General assistants are powerful but episodic. They repeatedly reconstruct the person, lose the history of what advice was tried and what happened, and blur the line between recommending and acting. Consilium explores persistent intelligence that belongs to the human rather than one chat session.
 
 ## What it does
-Consilium keeps an append-oriented longitudinal record of goals, commitments, advice, responses, actions, failures, adaptations, and outcomes. It derives versioned patterns with supporting and contradictory events. A Council Chair invokes only the user-appointed specialists; each retrieves its own verified public-domain source pack plus causal personal context and returns a citation-required structured report. Unknown or cross-councillor citations fail validation; insufficient support causes abstention.
 
-## Why WebMCP
-WebMCP is the architectural boundary between an external browser agent and the human’s system. It exposes exactly the useful capabilities—not a brittle UI and not a broad backend API. Tool availability changes with application state: proposal creation dynamically registers a commit capability, and successful commit removes it. Human and agent see the same live trace and state.
+The public demo preserves a synthetic 67-day history of goals, commitments, recommendations, responses, actions, failures, adaptations, and outcomes. It derives versioned patterns with supporting and contradictory events, confidence, time windows, and provenance. Memory is an active input to the recommendation, not a transcript panel.
 
-## Human + agent collaboration
-The external agent can understand current priorities, search bounded memory, consult the internal council, inspect evidence, and draft a proposal. It cannot silently convert advice into a persistent plan. The human explicitly authorizes the one-use commit.
+Only the user's three appointed councillors may participate. Each is restricted to its active verified public-domain source pack. Cloudflare retrieval gathers personal evidence and appointed-book evidence through separate filtered lanes, then canonical D1 hydration verifies every ID. Structured reports and the final recommendation are validated; unsupported, invented, cross-pack, or inadequately grounded claims are rejected, and insufficient support produces abstention.
 
-## Implementation
-Eight focused capabilities use the current `document.modelContext.registerTool` API, JSON schemas, read-only hints, and abort-signal registration lifecycle. One Cloudflare Worker serves the UI/API; D1 is canonical and Vectorize is derived. Personal and advisor retrieval paths use distinct pre-query metadata filters. The UI exposes pattern support, counterevidence, source editions, and every important tool result.
+## Why WebMCP is central
 
-## OpenAI technology
-The implementation constructs OpenAI Agents SDK’s agents-as-tools manager pattern with `gpt-5.6-sol` for council synthesis and distinct `gpt-5.6-terra` specialists. It bundles under Wrangler. Retrieval uses Workers AI `@cf/baai/bge-base-en-v1.5` at 768 dimensions and one cosine Vectorize index. Deterministic fixture mode proves advice causality and safety without pretending live model execution or production semantic retrieval.
+WebMCP is the collaboration boundary between an external browser agent and the human's persistent system. Seven stable tools expose current context, bounded memory search, pattern explanation, appointed-council provenance, consultation, trace inspection, and proposal creation. An eighth one-use commit tool exists only while the signed session owns a pending proposal. This is richer and safer than asking an agent to infer application state from pixels or giving it a broad mutation API.
+
+## What humans and agents do together
+
+The chosen browser agent can recover relevant history, compare failures with adaptations, consult the appointed council, inspect verifiable evidence, and draft a next action. The person sees the same trace and state. Advice never silently becomes a plan: proposal creation is explicitly non-mutating, and only an explicit owner-authorized commit persists one action and audit record.
+
+## How it was built
+
+The browser uses `document.modelContext.registerTool`, JSON schemas, annotations, and abort-signal lifecycle management. One isolated Cloudflare Worker serves the UI and API. D1 is canonical for longitudinal memory, pattern links, appointments, source text, reports, recommendations, proposals, actions, and audit records. Workers AI `@cf/baai/bge-base-en-v1.5` embeds queries. A 768-dimension cosine Vectorize index applies separate personal/advisor metadata filters before results are rehydrated from canonical D1.
+
+The deployed council reasoning is deterministic and dual-grounded. The live UI says **CLOUDFLARE RETRIEVAL · DETERMINISTIC COUNCIL**, and `/api/health` reports `openaiConfigured: false`. The repository contains an inactive, import-time Agents SDK compatibility adapter, but it is unconfigured, deliberately rejects execution, and is not part of the live runtime or acceptance evidence. No Responses API or GPT model call is claimed.
 
 ## Challenges and accomplishments
-The hardest problem was making agentic collaboration inspectable without exposing chain-of-thought, and making writes useful without weakening human control. We built safe operational tracing, evidence-ID validation, an injection fixture, deterministic reset, and a dynamic proposal→commit capability.
+
+The hardest work was making durable personalization auditable without exposing hidden reasoning, and making agent-driven actions useful without weakening human control. Consilium includes safe operational traces, canonical evidence-ID validation, semantic support checks, injection-resistance boundaries, abstention, signed-session isolation, atomic one-action commit, replay rejection, and deterministic cleanup.
 
 ## Learnings
-WebMCP becomes most valuable when capabilities encode product state and trust—not when it merely mirrors CRUD. Persistent memory and external agents complement each other when provenance and mutation authority are explicit.
 
-## What’s next
-Activate and benchmark the separately gated live Agents SDK adapter, extend browser proof to the mutation lifecycle if needed, and add private-memory pluggability without changing the public demo boundary.
+WebMCP is most valuable when tools encode product meaning, trust, and changing authority—not when they merely mirror CRUD. Persistent memory helps only when outcomes and counterevidence can change advice, and citations help only when the application verifies them against canonical sources.
 
 ## Built with
-WebMCP, OpenAI Agents SDK, Responses API, GPT-5.6 Sol, GPT-5.6 Terra, Cloudflare Workers AI, Vectorize, D1, TypeScript, HTML/CSS/JavaScript.
+
+WebMCP, Cloudflare Workers, Workers AI, Vectorize, D1, TypeScript, HTML, CSS, and JavaScript. The OpenAI Agents SDK is present only in an inactive compatibility adapter and is not a live dependency claim.
 
 ## Links
-- Live URL: **https://consilium-webmcp.patrickhallermann.workers.dev**
-- Public repository: **pending GitHub authorization/publication audit**
-- Video: **pending recording/upload**
 
-Testing: follow the 60-second judge test in `README.md`; full script in `DEMO.md`.
+- Live application: https://consilium-webmcp.patrickhallermann.workers.dev
+- Public repository: https://github.com/Paddyboy76/consilium-webmcp
+- Video: add the public YouTube URL after recording; no video is claimed yet
 
-## Evidence status
+## Judge testing instructions
 
-The Hetzner checkout passed in-process and local HTTP checks. The isolated Cloudflare Worker passed server-live D1/Workers AI/Vectorize acceptance, and supervisor Browser/WebMCP proof passed bounded memory search, canonical dual-grounded council consultation, and visible honest UI/trace/guardrail state. Proposal/commit/replay/reset are server-live corroborated rather than browser-proven. OpenAI Agents application execution remains untested and unclaimed; no paid OpenAI application call was made.
+1. Open the live application in ChatGPT's WebMCP-capable in-app browser or Chrome with WebMCP enabled.
+2. Reset the synthetic demo session.
+3. Ask: “Explain the protected single-action pattern, including counterevidence.”
+4. Ask: “What should I focus on in the next 45 minutes, and why?” Verify three reports, a non-abstained decision, personal ID `evt-64-adapt-success`, appointed-book IDs `marcus-b4-03`, `epictetus-ench-01a`, and `suntzu-3-2`, and a passing dual-grounding guardrail.
+5. Ask for a proposal without commit. Confirm no action persisted and the commit capability appears.
+6. Explicitly commit it. Confirm the action persists and the one-use commit capability disappears.
+7. Reset the synthetic session for the next judge.
+
+## Final submission checklist
+
+- [x] Public live URL
+- [x] Public repository on `main`
+- [x] Detectable MIT license
+- [x] Devpost-ready description and testing instructions
+- [x] Under-three-minute recording script
+- [ ] Patrick: record and upload the demo publicly to YouTube
+- [ ] Patrick: paste the YouTube URL above and into Devpost
+- [ ] Patrick: perform the final signed-in Devpost review and confirm submission before the deadline

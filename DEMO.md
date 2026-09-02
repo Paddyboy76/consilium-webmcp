@@ -1,23 +1,35 @@
-# Demo recording script (2:55)
+# Demo recording script — target 2:45
 
-**0:00–0:20** — “Most agents begin every conversation from zero. Consilium gives one human one sovereign memory and a council of evidence-backed specialists.” Show Today’s Focus, Personal Memory Signal, and the visible **DETERMINISTIC FIXTURE · NO LIVE MODEL** label. Do not describe fixture output as live model proof.
+Record the live URL in a WebMCP-capable browser. Keep the browser tool activity and Consilium page visible. Do not use music or third-party assets.
 
-**0:20–0:40** — Ask: **“Explain the protected single-action pattern, including counterevidence.”** Show 67 days, the time window, supporting events, and why “morning always succeeds” was rejected. Then show the three user-appointed public-domain editions.
+**0:00–0:18 — Problem and runtime**
 
-**0:40–1:50** — In ChatGPT’s built-in WebMCP browser, type exactly: **“I have 45 minutes before work. What should I actually focus on today, and why?”** Let it use `get_current_context`, `search_personal_memory`, and `consult_council`. Show the Council Trace appearing on the same page. Point to mem-001/mem-004 and advisor source IDs.
+“Most agents begin each conversation from zero. Consilium gives one human a durable memory and an evidence-bounded council.” Show the live URL, 67-day memory signal, and **CLOUDFLARE RETRIEVAL · DETERMINISTIC COUNCIL** label. “This live build uses Cloudflare retrieval and deterministic council reasoning; it does not claim a live OpenAI model call.”
 
-**1:50–2:20** — Type: **“Propose that as my next action, but do not commit it.”** Show Pending—not committed. Then type: **“Commit the pending action now.”** Show the audit ID and that the dynamic commit capability disappears.
+**0:18–0:42 — Memory that changes advice**
 
-**2:20–2:40** — Inspect the trace. “This is operational metadata, not hidden reasoning: the pre-advice evidence bundle, distinct councillors, exact personal and source IDs, validation, disagreement, and mutation status.”
+Ask: **“Explain the protected single-action pattern, including counterevidence.”** Show its time window, confidence, supporting IDs, contradictory IDs, the failed “morning always succeeds” hypothesis, and the later protected-block adaptation.
 
-**2:40–2:55** — “WebMCP is not remote-control glue here. It is the safe typed boundary through which the human’s chosen agent collaborates with persistent intelligence the human owns.” Show architecture diagram and thesis.
+**0:42–1:42 — Live WebMCP consultation**
 
-Before recording: run `npm run acceptance:hetzner`; reset the demo; confirm seven tools initially, eight while a proposal is pending, and seven after commit; confirm the displayed reasoning mode matches `/api/health`; use no music or third-party assets.
+Ask exactly: **“What should I focus on in the next 45 minutes, and why?”** Let the browser agent call context, memory search, and council consultation. On the page, show three appointed councillors and their source packs. Point to personal ID `evt-64-adapt-success` and book IDs `marcus-b4-03`, `epictetus-ench-01a`, and `suntzu-3-2`. Show three validated reports, `dualGrounded: true`, and the non-abstained recommendation.
 
-## Shot list
+**1:42–2:05 — Trace and guardrail**
 
-1. Mode label, 67-day memory signal, pattern time window, support and counterevidence.
-2. Three appointed councillors, exact translations/editions, stable locators, and excerpts.
-3. Consultation result explaining which history changed the recommendation; safe trace and evidence IDs.
-4. Pending proposal with zero committed actions; explicit commit; committed action/audit identifier and disappearing commit tool.
-5. Closing architecture/thesis frame. Browser footage and deployed HTTPS remain external evidence; never substitute staged screenshots.
+Ask the agent to inspect the council run. “This is safe operational trace, not hidden reasoning: exact evidence IDs, report status, disagreement, validation, and mutation status. Retrieved memory and book text are untrusted data; unknown or unsupported citations are rejected.”
+
+**2:05–2:34 — Proposal versus commit**
+
+Ask: **“Propose sending one accessibility pilot invitation, but do not commit it.”** Show **PENDING · NOT COMMITTED**, zero committed action for this clean session, and the tool count changing from seven to eight. Then ask: **“Commit the pending action now.”** Show the committed action and the tool count returning to seven. “Only the session owner can explicitly commit once; replay is rejected.”
+
+**2:34–2:45 — Close**
+
+“WebMCP is the typed boundary through which a person's chosen agent collaborates with persistent intelligence while evidence stays verifiable and action stays human-controlled.” Reset the synthetic demo for the next judge.
+
+## Before recording
+
+- Confirm `/api/health` is `ok`, `mode: cloudflare`, `reasoningMode: deterministic-dual-grounded`, `retrievalMode: workers-ai-vectorize`, and `openaiConfigured: false`.
+- Start from a reset synthetic session: no pending proposal and no committed actions.
+- Confirm seven tools initially, eight while pending, and seven after commit.
+- Use the exact consultation question above; keep all IDs legible.
+- Keep the final cut below 3:00, include narration audio, upload publicly to YouTube, and reset the session afterward.

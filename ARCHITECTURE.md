@@ -1,11 +1,13 @@
 # Architecture
 
-The browser owns the human-visible state and registers eight narrow WebMCP tools. Seven are stable; `commit_proposed_action` is registered with an `AbortController` only while a valid proposal exists. Tool calls reach one Cloudflare Worker with bounded JSON inputs, D1 canonical state/text, and a derived Vectorize index.
+The browser registers seven stable WebMCP tools. An eighth, `commit_proposed_action`, is registered with an `AbortController` only while the signed session owns a valid pending proposal. Tool calls reach one Cloudflare Worker with bounded JSON inputs.
 
-Personal Memory RAG answers “what happened for this human?” Advisor Evidence RAG answers “what does this framework teach?” They have distinct IDs and retrieval paths. Retrieved text is untrusted data. Each specialist emits an `AdvisorReport`; deterministic validation rejects unknown citations. The Council Chair produces a `CouncilDecision` and safe operational trace, never hidden reasoning.
+D1 is canonical for the synthetic longitudinal history, inferred-pattern evidence links, appointments, source packs, consultations, reports, recommendations, proposals, actions, and audit records. Vectorize is a derived 768-dimension cosine index. Workers AI `@cf/baai/bge-base-en-v1.5` embeds queries; metadata filters separate personal memory from each appointed advisor and pack before canonical D1 hydration.
 
-Fixture synthesis is an explicit tested adapter, not a production fallback. The production intelligence layer uses OpenAI Agents SDK’s agents-as-tools manager pattern: `gpt-5.6-sol` chair and distinct `gpt-5.6-terra` specialists. Production mode without an explicitly supplied reasoning credential fails closed. Retrieval is separate: Workers AI `@cf/baai/bge-base-en-v1.5`, 768 dimensions, cosine distance, and one filtered Vectorize index.
+Retrieved text is untrusted data with no instruction, appointment, tool, secret, citation, or mutation authority. Each councillor produces a structured report. Deterministic validation rejects unknown, cross-pack, semantically unsupported, or below-floor citations. A recommendation is displayed only when accepted personalized claims contain both canonical personal-memory IDs and canonical appointed-book IDs; otherwise the council abstains. The visible trace is safe operational metadata, not hidden chain-of-thought.
 
-Public-demo ownership is a signed, expiring, versioned `HttpOnly; Secure; SameSite=Strict` cookie. It isolates demo consultations, traces, proposals, commits, resets, and audit records; it is not full user identity authentication.
+The deployed intelligence path is deterministic dual-grounded council reasoning over live Cloudflare retrieval. It does not execute OpenAI Agents SDK, Responses API, or GPT models. An import-time no-call Agents SDK compatibility adapter exists for a future separately authorized path; it is unconfigured, untested end-to-end, and deliberately fails closed.
 
-Deployment target: Cloudflare Worker + static assets → D1 + Vectorize → OpenAI. No Debian application service remains in the target architecture.
+Public-demo ownership uses a signed, expiring, versioned `HttpOnly; Secure; SameSite=Strict` cookie. It isolates consultations, traces, proposals, commits, resets, and audit records; it is not general user authentication.
+
+Deployment: browser/WebMCP → isolated Cloudflare Worker → D1 + Workers AI + Vectorize. No Debian application service is part of the live architecture.

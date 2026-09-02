@@ -1,54 +1,45 @@
-# Hetzner release-candidate status
+# Final submission readiness
 
-Updated: 2026-09-01 UTC
+Updated: 2026-09-02 UTC
 
-## Checkpoint and scope
+## Current state
 
-- Authoritative start: clean `cede147620c65b14fa0b76ea9ed2a485b50a82d3` on `main` (verified before edits).
-- This sprint preserves the Phase 2 design and all P0 capabilities. It fixes one demonstrated WebMCP defect: browser schemas expected obsolete 12-hex IDs while the runtime issues UUID-shaped trace/proposal IDs.
-- The final phase created only the isolated Consilium Cloudflare resources recorded below. No paid OpenAI application call, OAuth credential inspection/reuse, Hallermann resource, custom route, DNS record, or out-of-scope service change occurred. `OPENAI_API_KEY` was not created or used.
+- Public repository: https://github.com/Paddyboy76/consilium-webmcp
+- Default branch: `main`; public GitHub head and starting Hetzner head were `cd3cb26576e707c688ea5999fd130c4b85368ead` before this final documentation commit.
+- Live application: https://consilium-webmcp.patrickhallermann.workers.dev
+- Proven Worker version: `1cdcd452-4a55-443a-98fa-058ee35260be`
+- D1: `consilium-webmcp-prod` (`c8152314-29a6-49f4-8007-eba51b2a2b9e`)
+- Vectorize: `consilium-evidence-bge768-v2`, 768 dimensions/cosine, five metadata indexes, 102 vectors
+- Runtime: Cloudflare Worker + canonical D1 + Workers AI embeddings + filtered Vectorize retrieval + deterministic dual-grounded council reasoning
+- Health: `status: ok`, `mode: cloudflare`, `reasoningMode: deterministic-dual-grounded`, `retrievalMode: workers-ai-vectorize`, `openaiConfigured: false`
 
-## Readiness matrix
+The live runtime does not execute OpenAI Agents SDK, Responses API, or GPT models. The repository's no-call Agents SDK compatibility adapter is unconfigured, deliberately fails closed, and has no end-to-end acceptance evidence.
 
-| Evidence level | Status | Exact evidence |
-|---|---|---|
-| Implemented | Ready | Longitudinal memory, causal patterning, dual grounding, appointed-source fidelity, signed session ownership, atomic one-action commit, safe trace, proposal/commit separation, eight WebMCP tools, fixture/live label, isolated acceptance and release scripts |
-| Tested in-process | Passed | Final suite: 10 files, 42 meaningful tests; fresh-migration Worker seed integration proves context plus 96 events, 3 patterns, 6 source chunks, and 3 appointments |
-| Built locally | Passed | Final `npm run release:check -- --skip-install --skip-http`: 3 assets, 3903.40 KiB raw / 687.18 KiB gzip; no deployment |
-| Tested through real local HTTP | Passed | Supervisor `npm run acceptance:hetzner` passed all nine checkpoints using the hardened ephemeral-port/run-identity harness. Result explicitly reported no OpenAI or remote Cloudflare calls. |
-| Externally tested | Browser/WebMCP scope passed | On Worker `1cdcd452-4a55-443a-98fa-058ee35260be`, bounded memory returned exactly 5 requested results and council consultation returned 3/3 validated reports, canonical dual grounding, a non-abstained decision, and honest visible UI/trace/guardrail state. Mutation controls remain server-live corroborated rather than browser-proven. |
-| Intentionally blocked by missing authorization | Not claimed | OpenAI Agents/Responses application T3: real adapter remains fail-closed without separately authorized `OPENAI_API_KEY` |
+## Evidence matrix
 
-The repository remains reproducible from Hetzner and is now deployed to an isolated workers.dev hostname. “Live” here proves Cloudflare D1/Workers AI/Vectorize plus deterministic dual-grounded synthesis, not OpenAI model execution.
+| Evidence level | Result |
+|---|---|
+| Implementation | 96-event longitudinal memory, causal patterns and counterevidence, three appointed source packs, canonical dual grounding, abstention, injection resistance, signed sessions, safe trace, proposal/commit boundary, and seven-plus-one WebMCP lifecycle |
+| Focused automated proof | 10 test files / 42 behavioral tests; prior post-browser repair subset: 24 focused tests |
+| Local HTTP proof | Nine checkpoints passed for fixture health, memory/patterns, provenance, dual grounding, isolation, atomic commit/replay rejection, reset, and UI/WebMCP assets |
+| Server-live proof | September 2 bounded journey passed health/UI, exact five-result memory retrieval, 3/3 validated reports, canonical IDs, non-abstained dual grounding, session forgery rejection, proposal non-mutation, owner-only atomic commit, replay rejection, and verified cleanup |
+| Browser/WebMCP proof | Memory search, council consultation, canonical grounding, and visible trace/guardrail passed on Worker version above |
+| Browser-only gap | Full proposal/commit/replay/reset lifecycle is server-live proven but not yet browser-proven |
 
-## Hardening audit
+## Public-repository readiness
 
-`docs/HARDENING_EVIDENCE.md` maps accepted behavior to behavioral proof: the `/api/memory` production branch now invokes the Workers AI BGE boundary, applies pre-query Vectorize filters, and hydrates only canonical/pipeline-compatible D1 rows; the immutable manifest/order; HMAC cookie attacks/rotation/replay; cross-session trace/proposal isolation; D1 conditional batch plus unique indexes for one action/audit; both-lane injection red teams; unrelated-citation and score-floor rejection; pipeline hash schema/write paths; operating limits; and exact public-domain provenance/hashes. Repository runtime reads only packaged synthetic/public sources; there are no further Brain2 reads.
+- Public `main` contains the intended Consilium history and MIT `LICENSE`; GitHub detects SPDX `MIT`.
+- Repository description is accurate. The homepage URL and topics still require authenticated GitHub metadata access from Patrick's session.
+- Tracked source contains synthetic personal data and packaged public-domain excerpts only. Local `.codex-input`, `.wrangler`, `node_modules`, and `data/consilium.db` are ignored and not tracked.
+- No OpenAI application key was set, read, created, or used during final preparation.
 
-## Finalization evidence
+## Official submission assessment
 
-- Fixture acceptance config omits Workers AI and Vectorize bindings, supplies a random signing secret only through the Wrangler process, uses unique `/tmp` D1 state, applies migrations 0001+0002, binds `127.0.0.1`, and traps cleanup.
-- Fresh checkout entry point: `npm run release:check` (`npm ci`, static checks, tests, no-deploy build, diff hygiene, local HTTP acceptance—each once).
-- `.gitignore` excludes environment/secret files, Wrangler state, DB journals, logs, coverage/build output, and generated proof artifacts while source manifests remain trackable.
-- Executed Cloudflare provisioning and remaining rollback/publication boundaries are recorded in `docs/CLOUDFLARE_PUBLICATION.md` and `docs/CLOUDFLARE_LIVE_EVIDENCE.md`.
-- Final successful sandbox RC sequence passed TypeScript/ESLint, all 42 tests, Wrangler dry-run, and diff hygiene. HTTP was skipped because this sandbox reproduces `listen EPERM`.
-- Worktree and every tracked Git revision produced no filenames matching API-key/private-key/token value signatures. Git object paths produced no Brain2, Next Shift, private journal database, Chroma, `.env`, or `.dev.vars` matches.
-- Supervisor HTTP evidence first found a pattern INSERT arity defect; removing its surplus placeholder was necessary but a rerun still returned 500. An exact fresh-migration SQLite integration then proved every SQL value/constraint while exposing the remaining D1-only issue: statement-per-row seeding required 143 D1 statements in one request, incompatible with the configured 40-subrequest budget. Seven `json_each` bulk inserts reduce the complete first-context path to 14 statements while preserving 96 canonical events, 3 patterns with evidence, 3 packs/6 chunks, and 3 appointments.
-- Acceptance-only diagnostics are enabled only in `wrangler.acceptance.jsonc`. A seed failure returns/logs `SEED_FAILURE` plus one fixed stage name; it never includes the underlying exception, SQL, parameters, records, cookies, or secrets. Harness failures additionally cap/redact the response and Wrangler tail; cleanup removes all temporary state.
-- Direct fresh local D1 commands proved both identity INSERTs succeed. The exact D1-specific failure was acceptance ordering under Wrangler 4.127.1: pre-start migration state was not visible in the Worker’s newly initialized D1 object. The harness now starts dev, waits for stateless health, applies 0001+0002 to that live persistence directory, and only then begins authenticated/stateful proof.
-- The former fixed-port readiness check could accept a stale Worker after its newly spawned Wrangler failed to bind. It is removed. The OS now selects a free ephemeral loopback port; readiness requires the exact child PID to remain alive, its own log to contain no bind/start failure, and `/api/health` to echo a random non-secret instance ID supplied only to that run. Wrangler runs in a dedicated process group that cleanup terminates recursively.
-- The random signing key is no longer present in process argv. It is written under umask 077 to a temporary Wrangler env file, redacted from bounded diagnostics, and deleted with the entire temporary directory.
-- Current supervisor proof is green: fixture health/signed cookie; longitudinal context/patterns; canonical support/counterevidence; appointed council/source provenance; dual-grounded advice/pipeline identity; cross-session/header/cookie forgery rejection; proposal separation with owner-only atomic commit and replay rejection; session-owned reset; and visible UI/WebMCP assets all passed through real local HTTP.
+The official rules require a WebMCP-powered app, working live URL, public repository with detectable open-source license, specified text description, and a public YouTube demo with audio under three minutes. They do not require Agents SDK, Responses API, or GPT execution. Details: `docs/HACKATHON_REQUIREMENTS.md`.
 
-## Remaining external actions
+## Only remaining mandatory actions
 
-1. Only with separate paid-API authorization, configure the application’s OpenAI key and run T3. Codex-assisted evaluation and deterministic Cloudflare synthesis are not T3.
-2. Do not add a custom route/domain, Cloudflare Access, or publish GitHub without separate authority.
+1. Patrick records the real under-three-minute demo using `DEMO.md` and uploads it publicly to YouTube.
+2. Patrick pastes the video URL into `SUBMISSION.md`/Devpost, performs the final signed-in review, and confirms submission before September 3, 2026 at 1:00 PM PDT.
 
-## Cloudflare deployment
-
-- Worker version: `1cdcd452-4a55-443a-98fa-058ee35260be` (supervisor Browser/WebMCP rerun passed for memory search, council consultation, and visible UI scope).
-- D1: `consilium-webmcp-prod` (`c8152314-29a6-49f4-8007-eba51b2a2b9e`).
-- Vectorize: `consilium-evidence-bge768-v2`, BGE768/cosine, all five required metadata indexes created before 102-vector insertion.
-- Live proof: after two browser-found contract repairs, the supervisor rerun passed exact bounded memory, 3/3 validated dual-grounded council synthesis, canonical evidence, honest pipeline identity, current trace, and visible guardrail/UI assertions. Proposal/commit/replay/reset remain server-live corroborated, not browser-proven. Exact evidence is in `docs/CLOUDFLARE_LIVE_EVIDENCE.md`.
-- Isolation: workers.dev only; no custom route/DNS; no Hallermann resource touched; ingestion disabled and its secret removed.
+Do not alter the submitted repository or live Worker during judging unless the official rules require it.

@@ -26,4 +26,6 @@ const proposal=await request('/api/proposals',{cookie:cookieA,method:'POST',body
 await request('/api/proposals',{cookie:cookieB,method:'POST',body:{text:'Session B private proposal',rationale:'Ownership proof'}});expectStatus(await request('/api/reset',{cookie:cookieB,method:'POST',body:{}}),200,'reset B');assert.equal((await request('/api/context',{cookie:cookieB})).data.pendingProposal,null);assert.equal((await request('/api/context',{cookie:cookieA})).data.actions.length,1);pass('session-owned reset');
 
 const html=await request('/');expectStatus(html,200,'UI');assert.match(html.data,/id="reasoning-mode"/);const app=await request('/app.js');expectStatus(app,200,'WebMCP asset');assert.match(app.data,/document\.modelContext\.registerTool/);pass('visible UI and WebMCP assets');
+expectStatus(await request('/api/reset',{cookie:cookieA,method:'POST',body:{}}),200,'reset A after proof');
+const cleanContext=await request('/api/context',{cookie:cookieA});expectStatus(cleanContext,200,'clean context after proof');assert.equal(cleanContext.data.pendingProposal,null);assert.equal(cleanContext.data.actions.length,0);pass('synthetic proof session reset for the next judge');
 console.log('RESULT Cloudflare live acceptance passed: Workers AI + Vectorize + D1; deterministic dual-grounded council; no OpenAI application call.');

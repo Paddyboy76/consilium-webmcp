@@ -1,6 +1,6 @@
 # Cloudflare live deployment evidence
 
-Verified: 2026-09-01 UTC
+Verified: 2026-09-02 UTC
 
 ## Isolated resources
 
@@ -54,6 +54,8 @@ The first live attempt passed real retrieval but correctly abstained because fix
 
 Result: `Cloudflare live acceptance passed: Workers AI + Vectorize + D1; deterministic dual-grounded council; no OpenAI application call.` The two acceptance attempts each made only the intended memory and consultation embedding requests; the repeat was required by the fail-closed calibration repair, not sampling.
 
+The bounded journey was rerun once on September 2 during final submission preparation. All ten listed checkpoints passed, followed by an explicit reset and assertion that both synthetic proof sessions had no pending proposal or committed action. This left the judge journey clean. No runtime code or deployable asset changed, so no deployment was performed and the proven Worker version remains unchanged.
+
 ## Browser-found contract defects and verified rerun
 
 A subsequent WebMCP-capable browser review found two real defects that invalidate any claim of completed browser acceptance for the current release:
@@ -78,5 +80,6 @@ This proves the live browser tool and visible-UI scope above. Proposal creation,
 - Passed: strict TypeScript/ESLint; 24 focused tests across production orchestration, bounded memory retrieval, canonical identity, seed behavior, retrieval filters, longitudinal causality, semantic support, injection resistance, and provider-specific score rejection. The earlier remote D1/Vectorize/Workers AI journey passed its then-current assertions.
 - Passed in a WebMCP-capable browser: bounded personal-memory search, deterministic dual-grounded council consultation with canonical evidence, and visible honest runtime/trace/guardrail UI against version `1cdcd452-4a55-443a-98fa-058ee35260be`.
 - Server-live corroboration only, not browser-proven: proposal creation, owner-only atomic commit, replay rejection, and reset ownership.
-- Not tested or claimed: OpenAI application reasoning/T3, genuine Agents SDK execution, custom-domain routing, Cloudflare Access, or GitHub publication.
+- Not tested or claimed: OpenAI application reasoning/T3, genuine Agents SDK execution, custom-domain routing, or Cloudflare Access.
+- Public repository verified: `https://github.com/Paddyboy76/consilium-webmcp`, default branch `main`, MIT license detected. At final-run start its public head matched Hetzner at `cd3cb26576e707c688ea5999fd130c4b85368ead`.
 - Production Free plan rejected custom Wrangler CPU/subrequest `limits` configuration. The production config therefore uses platform Free-plan limits while preserving all application-level caps; local and acceptance configs retain explicit 30,000 ms/40 settings.

@@ -1,50 +1,34 @@
-# Final Hetzner handoff
+# Windows supervisor checkpoint
 
-## Outcome
+Updated: 2026-09-02 UTC
 
-The repository is a reviewable Cloudflare-backed release candidate based on clean checkpoint `cede147620c65b14fa0b76ea9ed2a485b50a82d3`. Supervisor local/server live acceptance remains green. After two browser-found contract repairs, the Browser/WebMCP rerun passed bounded personal-memory search, canonical dual-grounded council consultation, and visible honest UI/trace/guardrail state on the current Worker. Paid OpenAI application T3 remains separately unclaimed.
+## Ready now
 
-## What changed
+- Local branch is `main`. Resolve the final SHA with `git rev-parse HEAD`; compare it with `gh api repos/Paddyboy76/consilium-webmcp/commits/main --jq .sha`. The worktree must be empty after publication.
+- Live application: `https://consilium-webmcp.patrickhallermann.workers.dev`
+- Current proven Worker version: `1cdcd452-4a55-443a-98fa-058ee35260be`
+- Live health passed: Cloudflare Worker, deterministic dual-grounded reasoning, Workers AI/Vectorize retrieval, OpenAI unconfigured.
+- Public GitHub repository is visible on default branch `main`; GitHub detects the MIT license.
+- Devpost-ready copy and judge instructions are in `SUBMISSION.md`; the exact real-video script is in `DEMO.md`.
 
-- Corrected WebMCP trace/proposal input schemas to match runtime UUID IDs, restoring dynamic inspect/commit usability.
-- Added a visible fixture-versus-live reasoning label sourced from `/api/health`.
-- Added a dedicated local acceptance configuration with no AI/Vectorize bindings and scripts proving the full HTTP ownership and golden journey.
-- Added a fresh-checkout release command, runtime artifact ignores, supervisor acceptance guide, and unexecuted publication/rollback plan.
-- Corrected stale checkpoint/pending-commit/“partially ready” documentation and added explicit evidence levels.
-- Repaired the supervisor-discovered first-seed D1 pattern INSERT arity defect. Acceptance failures now include bounded, redacted response and Wrangler diagnostics without retaining temporary state.
-- Replaced 143 statement-per-row seed operations with bounded bulk inserts and added a fresh-migration Worker integration test that verifies canonical row counts. Acceptance-only failures expose only a fixed seed-stage code.
-- Removed fixed-port/stale-process ambiguity and argv secret exposure from the acceptance wrapper; cleanup now owns the full Wrangler process group.
+## Final-run changes
 
-## Exact commands
+Submission-facing documentation was reconciled with the deployed evidence. Stale claims that publication/HTTPS were pending, that the product was only a local Python prototype, and that old tool/test counts were current were removed. Live OpenAI Agents SDK, Responses API, and GPT execution claims were replaced with the truth: the deployed path is deterministic Cloudflare council reasoning, while the repository adapter is inactive, unconfigured, and untested end-to-end.
 
-```bash
-cd /home/patadmin/consilium-webmcp
-npm run acceptance:hetzner
-```
+Files changed in this final run: `README.md`, `ARCHITECTURE.md`, `STATUS.md`, `EVENING_HANDOFF.md`, `SUBMISSION.md`, `DEMO.md`, `docs/CLOUDFLARE_LIVE_EVIDENCE.md`, `docs/HACKATHON_REQUIREMENTS.md`, and `docs/JUDGE_REVIEW.md`.
 
-For a fresh checkout, `npm run release:check` installs from `package-lock.json` and then runs every release check once. Full acceptance behavior and expected output are in `docs/HETZNER_ACCEPTANCE.md`.
+## Proof completed
 
-## Evidence separation
+- Read-only public health and UI checks passed.
+- The bounded production journey passed real Workers AI + Vectorize retrieval, canonical D1 hydration, exact five-result memory bounds, three appointed councillors, three validated reports, non-abstained dual grounding, canonical personal/advisor IDs, signed-session isolation, proposal non-mutation, owner-only atomic commit, audit creation, replay rejection, UI asset checks, and verified cleanup of both synthetic proof sessions.
+- Existing supervisor Browser/WebMCP proof remains valid for memory retrieval, council consultation, canonical grounding, and visible trace/guardrail on the Worker version above.
+- Final documentation/diff/secret-hygiene checks were run; no deploy was needed because runtime assets did not change.
 
-| Category | Result |
-|---|---|
-| Implemented | All P0 capabilities plus final acceptance/reproducibility packaging |
-| Tested in-process | Strict TypeScript/ESLint passed; 10 test files / 42 tests passed |
-| Built/no-deploy | Wrangler 4.127.1 dry-run passed: 3 assets; 3903.40 KiB raw / 687.18 KiB gzip |
-| Tested via real local HTTP | Passed all nine supervisor checkpoints: health/cookie, memory/patterns, canonical evidence, council provenance, dual grounding, forgery isolation, atomic commit/replay rejection, reset ownership, and UI/WebMCP assets |
-| Externally tested | Browser/WebMCP memory search, 3/3 validated dual-grounded council consultation, canonical evidence, and visible honest UI/trace/guardrail passed on the current Worker |
-| Server-live corroboration only | Proposal creation, owner-only atomic commit, replay rejection, and reset ownership |
-| Externally untested | OpenAI application runtime/Agents SDK, custom domain/Access |
-| Intentionally blocked | OpenAI application T3/Agents runtime without separately authorized paid credential |
+## Genuine blockers / next Windows actions
 
-## Publication boundary
+1. GitHub CLI on Debian has no authenticated host. In an authenticated Windows session, confirm the pushed SHA, set repository homepage to the live URL, and add accurate topics such as `webmcp`, `cloudflare-workers`, `vectorize`, `d1`, and `rag`.
+2. Wrangler OAuth on Debian is expired. No deployment is required for documentation-only changes; retain Worker version `1cdcd452-4a55-443a-98fa-058ee35260be`.
+3. Optional but valuable: browser-prove proposal → dynamic commit tool → explicit commit → tool removal → reset. Do not relabel server-live proof as browser proof.
+4. Record the `DEMO.md` journey, upload it publicly to YouTube, paste the URL into Devpost, do the final signed-in review, and submit. No video exists yet.
 
-No GitHub push, custom DNS/route change, Hallermann change, or OpenAI application call occurred. Cloudflare mutations were limited to the named Consilium Worker, D1 database, Vectorize index/metadata indexes, and Worker session secret. The temporary ingestion secret was removed. Do not configure `OPENAI_API_KEY` without distinct authorization.
-
-## P0 cut policy
-
-Never cut append-oriented memory, memory-shaped advice, causal/counterevidence proof, dual grounding, appointed source fidelity, canonical/semantic citation rejection, session ownership, atomic commit, injection resistance, safe trace, or the eight-tool WebMCP lifecycle.
-
-## Cloudflare handoff
-
-The isolated deployment is live at `https://consilium-webmcp.patrickhallermann.workers.dev`, current version `1cdcd452-4a55-443a-98fa-058ee35260be`. D1 `consilium-webmcp-prod` and Vectorize `consilium-evidence-bge768-v2` contain only synthetic demo memory and packaged public-domain evidence. The supervisor Browser/WebMCP rerun passed exact `limit: 5` memory behavior and the exact 45-minute council question with 3 reports, 3 validated reports, canonical personal/advisor IDs, a non-abstained dual-grounded decision, honest pipeline identity, and visible passing trace/guardrail state. Mutation controls remain server-live corroborated rather than browser-proven. Exact evidence and boundaries: `docs/CLOUDFLARE_LIVE_EVIDENCE.md`.
+Do not configure or reuse an OpenAI credential, touch Hallermann production resources, add a custom route, or change the live architecture for submission polish.
