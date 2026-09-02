@@ -1,4 +1,8 @@
-# Devpost-ready submission copy
+# Devpost-ready recovery submission copy
+
+Consilium is a compact Cloudflare adaptation of a mature personal operating system. The recovered experience organizes a synthetic life into domains and cross-horizon missions, turns progress and failure into structured reflection, makes that history change the morning brief, and convenes a user-appointed council whose personal and public-domain source evidence is inspectable. Human and WebMCP interactions share the same D1 workflows; recommendations remain proposals until explicit commit.
+
+The visual and interaction architecture selectively adapts user-owned Brain2 patterns. The data, Cloudflare Worker/D1/Vectorize layer, WebMCP boundary, and public-domain passage packs are challenge-specific. The current council synthesis is deterministic and explicitly labelled; Workers AI supplies production embeddings.
 
 ## Project title
 

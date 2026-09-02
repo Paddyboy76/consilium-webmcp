@@ -26,19 +26,33 @@ class VectorizeFixture {
 }
 
 const baseEnv=(database:DatabaseSync)=>({DB:new SqliteD1(database),MODEL_CONFIG_VERSION:'council-v1',PIPELINE_VERSION:'1f5efdc1c1ef895b221f8dba3ab9c6b64139eb4265eb33a154ba560aa761109f',CONSULTATION_LIMIT_PER_HOUR:'6',SESSION_KEY_VERSION:'k1',SESSION_SIGNING_KEY:'test-only-signing-secret-at-least-32-bytes',ASSETS:{fetch:()=>Promise.resolve(new Response('asset'))}});
-const migratedDatabase=()=>{const database=new DatabaseSync(':memory:');database.exec(readFileSync('migrations/0001_initial.sql','utf8'));database.exec(readFileSync('migrations/0002_hardening.sql','utf8'));return database};
+const migratedDatabase=()=>{const database=new DatabaseSync(':memory:');database.exec(readFileSync('migrations/0001_initial.sql','utf8'));database.exec(readFileSync('migrations/0002_hardening.sql','utf8'));database.exec(readFileSync('migrations/0003_recovery_product.sql','utf8'));return database};
 
 describe('first-request D1 seed',()=>{
+  it('persists the recovered mission → failure → reflection → brief loop on one session',async()=>{
+    const database=migratedDatabase(),env={...baseEnv(database),APP_MODE:'fixture'};
+    const initial=await worker.fetch(new Request('https://fixture.test/api/product'),env as never),cookie=initial.headers.get('set-cookie')?.split(';')[0],product=await initial.json<{areas:{id:string}[];missions:unknown[]}>();
+    expect({status:initial.status,areas:product.areas.length,missions:product.missions.length}).toEqual({status:200,areas:4,missions:8});
+    const call=async(path:string,input:unknown)=>worker.fetch(new Request(`https://fixture.test${path}`,{method:'POST',headers:{cookie:cookie!,'content-type':'application/json'},body:JSON.stringify(input)}),env as never);
+    const created=await call('/api/missions',{kind:'goal',areaId:product.areas[0]!.id,horizon:'today',title:'Unique recovery goal',why:'Prove linked history'}),mission=await created.json<{id:string}>();
+    expect(created.status).toBe(201);
+    expect((await call('/api/progress',{missionId:mission.id,result:'failure',progress:10,note:'The first attempt failed'})).status).toBe(201);
+    const reflected=await call('/api/reflections',{missionId:mission.id,achieved:'Created the goal',failed:'Missed the test',happened:'Polished instead',why:'Avoided exposure',lesson:'Test first',adaptation:'Send before polishing',tomorrow:'Open the contact list first'}),reflection=await reflected.json<{id:string}>();
+    expect(reflected.status).toBe(201);
+    const briefResponse=await call('/api/briefs/generate',{}),brief=await briefResponse.json<{priorities:{why:string;evidenceIds:string[]}[]}>();
+    expect(brief.priorities[0]?.why).toContain('Open the contact list first');expect(brief.priorities[0]?.evidenceIds).toEqual([reflection.id]);
+    expect(database.prepare("SELECT COUNT(*) count FROM webmcp_calls WHERE session_id=(SELECT session_id FROM missions WHERE id=?)").get(mission.id)?.count).toBe(4);
+  });
   it('seeds a fresh migrated database and returns context',async()=>{
     const database=migratedDatabase();
     const response=await worker.fetch(new Request('https://fixture.test/api/context'),{...baseEnv(database),APP_MODE:'fixture'} as never);
     const body=await response.json<{historySummary?:{days:number};error?:string}>();
     expect({status:response.status,error:body.error,days:body.historySummary?.days}).toEqual({status:200,error:undefined,days:67});
-    expect({events:database.prepare('SELECT COUNT(*) count FROM events').get()?.count,patterns:database.prepare('SELECT COUNT(*) count FROM patterns').get()?.count,chunks:database.prepare('SELECT COUNT(*) count FROM source_chunks').get()?.count,appointments:database.prepare('SELECT COUNT(*) count FROM council_appointments').get()?.count}).toEqual({events:96,patterns:3,chunks:6,appointments:3});
+    expect({events:database.prepare('SELECT COUNT(*) count FROM events').get()?.count,patterns:database.prepare('SELECT COUNT(*) count FROM patterns').get()?.count,chunks:database.prepare('SELECT COUNT(*) count FROM source_chunks').get()?.count,appointments:database.prepare('SELECT COUNT(*) count FROM council_appointments').get()?.count}).toEqual({events:96,patterns:3,chunks:18,appointments:3});
   });
   it('keeps Cloudflare retrieval separate from deterministic dual-grounded synthesis',async()=>{
     const database=migratedDatabase(),env={...baseEnv(database),APP_MODE:'cloudflare',AI:new CloudflareAiFixture(),VECTOR_INDEX:new VectorizeFixture(),INGESTION_ENABLED:'true',INGESTION_KEY:'fixture-ingestion-key'};
-    const ingested=await worker.fetch(new Request('https://fixture.test/api/admin/ingest-vectors',{method:'POST',headers:{authorization:'Bearer fixture-ingestion-key'}}),env as never),ingestion=await ingested.json<{total:number}>();expect({status:ingested.status,total:ingestion.total}).toEqual({status:200,total:102});const cookie=ingested.headers.get('set-cookie')?.split(';')[0];expect(cookie).toBeTruthy();
+    const ingested=await worker.fetch(new Request('https://fixture.test/api/admin/ingest-vectors',{method:'POST',headers:{authorization:'Bearer fixture-ingestion-key'}}),env as never),ingestion=await ingested.json<{total:number}>();expect({status:ingested.status,total:ingestion.total}).toEqual({status:200,total:114});const cookie=ingested.headers.get('set-cookie')?.split(';')[0];expect(cookie).toBeTruthy();
     const memory=await worker.fetch(new Request('https://fixture.test/api/memory?q=pilot&limit=5',{headers:{cookie:cookie!}}),env as never),memoryBody=await memory.json<{retrievalMode:string;results:unknown[]}>();expect({mode:memoryBody.retrievalMode,results:memoryBody.results.length}).toEqual({mode:'workers-ai-bge768',results:5});
     const capped=await worker.fetch(new Request('https://fixture.test/api/memory?q=pilot&limit=99',{headers:{cookie:cookie!}}),env as never),cappedBody=await capped.json<{results:unknown[]}>();expect(cappedBody.results).toHaveLength(8);
     const consultation=await worker.fetch(new Request('https://fixture.test/api/council',{method:'POST',headers:{cookie:cookie!,'content-type':'application/json'},body:JSON.stringify({question:'What should I focus on in the next 45 minutes, and why?'})}),env as never),body=await consultation.json<{modelMode:string;retrieval:{provider:string};reports:{abstained:boolean;claims:{personalEvidenceIds:string[];advisorEvidenceIds:string[]}[]}[];validation:{dualGrounded:boolean};decision:{abstained:boolean;validatedReports:unknown[];personalEvidenceIds:string[];advisorEvidenceIds:string[]}}>();

@@ -1,6 +1,14 @@
 # Architecture
 
-The browser registers seven stable WebMCP tools. An eighth, `commit_proposed_action`, is registered with an `AbortController` only while the signed session owns a valid pending proposal. Tool calls reach one Cloudflare Worker with bounded JSON inputs.
+## Recovery application layer
+
+The recovered shell is a zero-build responsive frontend served by Worker Assets. It adapts Brain2’s dense dark monospaced navigation, domain grouping, mission focus/progress interaction, CAAR reflection vocabulary, morning-brief hierarchy, council/library, and transparency architecture. A thin browser client calls the same Worker routes exposed through WebMCP.
+
+Migration `0003_recovery_product.sql` adds session-scoped `life_areas`, `missions`, `progress_logs`, `reflections`, `morning_briefs`, and `webmcp_calls`. Consequential council actions continue through the pre-existing `proposals` → atomic `actions` boundary. D1 remains canonical; no browser-only state represents a committed fact.
+
+The morning brief is deterministic and inspectable: it selects active missions, then explicitly lets the newest reflection’s adaptation and tomorrow implication change the first priority rationale. It stores both the priority JSON and exact evidence IDs.
+
+The browser registers nine stable recovery tools. A tenth, `commit_proposed_action`, is registered with an `AbortController` only while the signed session owns a valid pending proposal. Tool calls reach one Cloudflare Worker with bounded JSON inputs.
 
 D1 is canonical for the synthetic longitudinal history, inferred-pattern evidence links, appointments, source packs, consultations, reports, recommendations, proposals, actions, and audit records. Vectorize is a derived 768-dimension cosine index. Workers AI `@cf/baai/bge-base-en-v1.5` embeds queries; metadata filters separate personal memory from each appointed advisor and pack before canonical D1 hydration.
 
