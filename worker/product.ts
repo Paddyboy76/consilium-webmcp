@@ -67,18 +67,20 @@ export async function seedProduct(db:D1Database,session:string){
 }
 
 async function productState(db:D1Database,session:string){
-  const [areas,missions,logs,reflections,structuredReflections,goalReflections,directives,briefs,calls]=await db.batch([
+  const [areas,missions,logs,journals,reflections,structuredReflections,goalReflections,facts,directives,briefs,calls]=await db.batch([
     db.prepare('SELECT * FROM life_areas WHERE session_id=? AND is_active=1 ORDER BY position').bind(session),
     db.prepare('SELECT * FROM missions WHERE session_id=? ORDER BY CASE horizon WHEN \'today\' THEN 0 WHEN \'weekly\' THEN 1 WHEN \'quarterly\' THEN 2 ELSE 3 END, created_at').bind(session),
     db.prepare('SELECT p.*,m.title mission_title,a.name area_name FROM progress_logs p JOIN missions m ON m.id=p.mission_id JOIN life_areas a ON a.id=m.area_id WHERE p.session_id=? ORDER BY occurred_at DESC LIMIT 30').bind(session),
+    db.prepare('SELECT j.*,m.title mission_title,a.name area_name,a.code area_code FROM journal_entries j JOIN life_areas a ON a.id=j.area_id LEFT JOIN missions m ON m.id=j.mission_id WHERE j.session_id=? ORDER BY occurred_at DESC LIMIT 30').bind(session),
     db.prepare('SELECT r.*,m.title mission_title,a.name area_name FROM reflections r LEFT JOIN missions m ON m.id=r.mission_id LEFT JOIN life_areas a ON a.id=m.area_id WHERE r.session_id=? ORDER BY occurred_at DESC LIMIT 20').bind(session),
     db.prepare('SELECT * FROM nightly_reflections WHERE session_id=? ORDER BY accepted_at DESC LIMIT 20').bind(session),
     db.prepare('SELECT g.*,m.title goal_title,a.name area_name FROM goal_reflections g JOIN missions m ON m.id=g.goal_id JOIN life_areas a ON a.id=g.area_id WHERE g.session_id=? ORDER BY g.created_at DESC LIMIT 60').bind(session),
+    db.prepare('SELECT * FROM reflection_facts WHERE session_id=? ORDER BY created_at DESC LIMIT 120').bind(session),
     db.prepare('SELECT * FROM tomorrow_directives WHERE session_id=? ORDER BY created_at DESC LIMIT 20').bind(session),
     db.prepare('SELECT * FROM morning_briefs WHERE session_id=? ORDER BY generated_at DESC LIMIT 1').bind(session),
     db.prepare('SELECT * FROM webmcp_calls WHERE session_id=? ORDER BY created_at DESC LIMIT 20').bind(session)
   ]);
-  return {areas:areas!.results,missions:missions!.results,progressLogs:logs!.results,reflections:reflections!.results,nightlyReflections:structuredReflections!.results,goalReflections:goalReflections!.results,tomorrowDirectives:directives!.results,morningBrief:briefs!.results[0]??null,webmcpCalls:calls!.results,lastWebmcpCall:calls!.results[0]??null,synthetic:true};
+  return {areas:areas!.results,missions:missions!.results,progressLogs:logs!.results,journalEntries:journals!.results,reflections:reflections!.results,nightlyReflections:structuredReflections!.results,goalReflections:goalReflections!.results,reflectionFacts:facts!.results,tomorrowDirectives:directives!.results,morningBrief:briefs!.results[0]??null,webmcpCalls:calls!.results,lastWebmcpCall:calls!.results[0]??null,synthetic:true};
 }
 
 async function audit(db:D1Database,session:string,tool:string,input:unknown,result:unknown){
@@ -96,10 +98,17 @@ export async function handleProduct(request:Request,env:ProductBindings,session:
     const result={id:uuid(kind),title,kind,horizon,status:'active'};await env.DB.prepare('INSERT INTO missions(id,session_id,area_id,kind,title,why_text,horizon,status,progress,target_date,created_at) VALUES(?,?,?,?,?,?,?,\'active\',0,?,datetime(\'now\'))').bind(result.id,session,areaId,kind,title,why,horizon,clean(input.targetDate,10)||null).run();await audit(env.DB,session,'create_mission',input,result);return reply(result,201);
   }
   if(url.pathname==='/api/progress'&&request.method==='POST'){
-    const input=await body(),missionId=clean(input.missionId,120),note=clean(input.note,800),progress=Number(input.progress),result=String(input.result);
-    if(!missionId||note.length<3||!Number.isInteger(progress)||progress<0||progress>100||!['progress','success','partial','failure'].includes(result))return reply({error:'INVALID_PROGRESS'},400);
+    const input=await body(),missionId=clean(input.missionId,120),note=clean(input.note,800),progress=Number(input.progress),result=String(input.result),statusAfter=typeof input.statusAfter==='string'?input.statusAfter:((result==='success'&&progress===100)?'completed':'active');
+    if(!missionId||note.length<3||!Number.isInteger(progress)||progress<0||progress>100||!['progress','success','partial','failure'].includes(result)||!['active','paused','completed'].includes(statusAfter))return reply({error:'INVALID_PROGRESS'},400);
     const owned=await env.DB.prepare('SELECT id FROM missions WHERE id=? AND session_id=?').bind(missionId,session).first();if(!owned)return reply({error:'MISSION_NOT_FOUND'},404);
-    const output={id:uuid('progress'),missionId,result,progress};await env.DB.batch([env.DB.prepare('INSERT INTO progress_logs VALUES(?,?,?,?,?,?,datetime(\'now\'))').bind(output.id,session,missionId,result,progress,note),env.DB.prepare('UPDATE missions SET progress=?,status=? WHERE id=? AND session_id=?').bind(progress,result==='success'&&progress===100?'completed':'active',missionId,session)]);await audit(env.DB,session,'log_progress',input,output);return reply(output,201);
+    const output={id:uuid('progress'),missionId,result,progress,statusAfter};await env.DB.batch([env.DB.prepare('INSERT INTO progress_logs VALUES(?,?,?,?,?,?,datetime(\'now\'))').bind(output.id,session,missionId,result,progress,note),env.DB.prepare('UPDATE missions SET progress=?,status=? WHERE id=? AND session_id=?').bind(progress,statusAfter,missionId,session)]);await audit(env.DB,session,'log_progress',input,output);return reply(output,201);
+  }
+  if(url.pathname==='/api/journal'&&request.method==='POST'){
+    const input=await body(),bodyText=clean(input.body,4000),areaId=clean(input.areaId,120),missionId=clean(input.missionId,120)||null,mood=String(input.mood);
+    if(bodyText.length<20||!areaId||!['energized','steady','strained','reflective'].includes(mood))return reply({error:'INVALID_JOURNAL_ENTRY'},400);
+    const area=await env.DB.prepare('SELECT id FROM life_areas WHERE id=? AND session_id=? AND is_active=1').bind(areaId,session).first();if(!area)return reply({error:'AREA_NOT_FOUND'},404);
+    if(missionId){const mission=await env.DB.prepare('SELECT id FROM missions WHERE id=? AND area_id=? AND session_id=?').bind(missionId,areaId,session).first();if(!mission)return reply({error:'MISSION_NOT_FOUND'},404)}
+    const output={id:uuid('journal'),areaId,missionId,mood,occurredAt:new Date().toISOString()};await env.DB.prepare('INSERT INTO journal_entries VALUES(?,?,?,?,?,?,?)').bind(output.id,session,areaId,missionId,bodyText,mood,output.occurredAt).run();await audit(env.DB,session,'record_journal_entry',input,output);return reply(output,201);
   }
   if(url.pathname==='/api/reflections'&&request.method==='POST'){
     const input=await body(),validated=validateReflection(input);if(!validated.ok)return reply({error:'INVALID_REFLECTION',fieldErrors:validated.fieldErrors},400);

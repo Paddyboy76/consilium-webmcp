@@ -17,7 +17,7 @@ class SqliteD1 {
   async batch(statements:SqliteStatement[]){const results=[];for(const statement of statements)results.push(statement.reads?await statement.all():await statement.run());return results}
 }
 
-const files=['0001_initial.sql','0002_hardening.sql','0003_recovery_product.sql','0004_structured_reflection.sql','0005_exact_life_domains.sql'];
+const files=['0001_initial.sql','0002_hardening.sql','0003_recovery_product.sql','0004_structured_reflection.sql','0005_exact_life_domains.sql','0006_pass5_journal_commit.sql'];
 const env=(database:DatabaseSync)=>({DB:new SqliteD1(database),APP_MODE:'fixture',MODEL_CONFIG_VERSION:'council-v1',PIPELINE_VERSION:'1f5efdc1c1ef895b221f8dba3ab9c6b64139eb4265eb33a154ba560aa761109f',CONSULTATION_LIMIT_PER_HOUR:'6',SESSION_KEY_VERSION:'k1',SESSION_SIGNING_KEY:'test-only-signing-secret-at-least-32-bytes',ASSETS:{fetch:()=>Promise.resolve(new Response('asset'))}});
 
 describe('Pass 4 exact Consilium life domains',()=>{
@@ -36,7 +36,7 @@ describe('Pass 4 exact Consilium life domains',()=>{
   it('upgrades an already-seeded four-area session additively and retains legacy history',async()=>{
     const database=new DatabaseSync(':memory:');for(const file of files.slice(0,4))database.exec(readFileSync(`migrations/${file}`,'utf8'));
     database.exec("INSERT INTO users VALUES('demo-user','Demo','2026-01-01'); INSERT INTO sessions VALUES('legacy','demo-user','2026-01-01','v1'); INSERT INTO life_areas VALUES('legacy-health','legacy','Health','old health','#0f0',1,'2026-01-01'),('legacy-relationships','legacy','Relationships','old social','#f0f',2,'2026-01-01'),('legacy-learning','legacy','Learning','old learning','#0ff',3,'2026-01-01'),('legacy-vocation','legacy','Vocation','old vocation','#f50',0,'2026-01-01'); INSERT INTO missions VALUES('legacy-writing','legacy','legacy-learning','project','Publish field notes','Turn learning into craft','quarterly','active',20,NULL,'2026-01-01'); INSERT INTO progress_logs VALUES('legacy-log','legacy','legacy-writing','progress',20,'Draft retained','2026-01-02'); INSERT INTO reflections VALUES('legacy-reflection','legacy','legacy-writing','A','B','C','D','E','F','G','2026-01-03')");
-    database.exec(readFileSync('migrations/0005_exact_life_domains.sql','utf8'));
+    database.exec(readFileSync('migrations/0005_exact_life_domains.sql','utf8'));database.exec(readFileSync('migrations/0006_pass5_journal_commit.sql','utf8'));
     const response=await worker.fetch(new Request('https://fixture.test/api/product',{headers:{cookie:'consilium_session=invalid'}}),env(database) as never);
     // Exercise the upgrader directly against the known legacy session after request-level schema proof.
     const {seedProduct}=await import('../worker/product');await seedProduct(new SqliteD1(database) as never,'legacy');

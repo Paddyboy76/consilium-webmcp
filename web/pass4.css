@@ -4,6 +4,25 @@
   gap: 8px;
 }
 
+.head-actions, .filter-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.head-actions button, .filter-row button { border: 1px solid var(--line2); background: transparent; color: var(--text); padding: 9px 12px; font-size: 9px; letter-spacing: .1em; cursor: pointer; }
+.filter-row { margin: -16px 0 20px; }
+.filter-row button { padding: 5px 9px; color: var(--dim); }
+.filter-row button.active { border-color: var(--orange); color: var(--orange2); }
+.structured-memory { border-left: 3px solid var(--purple); }
+.memory-fact { display: block; border-bottom: 1px solid var(--line); padding: 6px 0; }
+.memory-fact b { color: var(--orange2); text-transform: uppercase; margin-right: 8px; }
+.tool-group { border: 1px solid var(--line); padding: 12px; margin-bottom: 10px; }
+.webmcp-panel, .webmcp-panel > *, #tool-inspector, .tool-group, .tool-row, .webmcp-panel pre { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+.webmcp-panel pre { white-space: pre-wrap; word-break: break-word; overflow-x: auto; }
+
+@media (max-width: 720px) {
+  .head-actions { width: 100%; }
+  .head-actions button { flex: 1; }
+  .filter-row { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+  .filter-row button { flex: none; }
+}
+
 .domain-summary > div {
   display: grid;
   gap: 7px;
