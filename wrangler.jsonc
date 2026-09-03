@@ -13,7 +13,7 @@
   }],
   "vectorize": [{ "binding": "VECTOR_INDEX", "index_name": "consilium-evidence-bge768-v2" }],
   "ai": { "binding": "AI" },
-  "vars": { "APP_MODE": "fixture", "MODEL_CONFIG_VERSION": "workers-ai-json-council-v14-bounded-semantic-proof", "PIPELINE_VERSION": "0f7f47a4116e02d59f2622824e4535cda5c92ffa2eb0648deda04bd72309bed5", "CONSULTATION_LIMIT_PER_HOUR": "6", "SESSION_KEY_VERSION": "k1" },
+  "vars": { "APP_MODE": "fixture", "MODEL_CONFIG_VERSION": "workers-ai-json-council-v15-bounded-quote-identity", "PIPELINE_VERSION": "0f7f47a4116e02d59f2622824e4535cda5c92ffa2eb0648deda04bd72309bed5", "CONSULTATION_LIMIT_PER_HOUR": "6", "SESSION_KEY_VERSION": "k1" },
   "limits": { "cpu_ms": 30000, "subrequests": 40 },
   "observability": { "enabled": true, "head_sampling_rate": 1 }
 }

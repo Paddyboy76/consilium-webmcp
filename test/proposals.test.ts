@@ -15,5 +15,9 @@ describe('proposal targeting and duplicate guard',()=>{
     {id:'vocational',title:'Ask a potential client about the audit',why:'Test the studio offer',areaCode:'VOC'}
   ];
   it('selects the relevant owned goal instead of array position',()=>{expect(selectProposalTarget('Ask my brother to own the solicitor paperwork for Mum’s house sale.',missions)?.id).toBe('social');expect(selectProposalTarget('Send Priya the accessibility audit message.',missions)?.id).toBe('vocational')});
-  it('recognizes equivalent family-paperwork actions without conflating Mum contact',()=>{expect(equivalentActionText('Ask my brother to take the solicitor paperwork.','Have a family member own one house-sale paperwork task.')).toBe(true);expect(equivalentActionText('Call Mum when I have room to be present.','Ask my brother to take the solicitor paperwork.')).toBe(false)});
+  it('recognizes the bounded brother-paperwork paraphrase without conflating shared topics or recipients',()=>{
+    expect(equivalentActionText('Ask my brother to take the solicitor paperwork.','Have a family member own one house-sale paperwork task.')).toBe(true);
+    expect(equivalentActionText('Call Mum about the house sale.','Ask my brother to handle the estate-agent paperwork.')).toBe(false);
+    expect(equivalentActionText('Message the client about the paperwork.','Message my brother about the paperwork.')).toBe(false);
+  });
 });

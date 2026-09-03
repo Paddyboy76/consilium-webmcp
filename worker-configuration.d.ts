@@ -7,7 +7,7 @@ interface __BaseEnv_Env {
 	AI: Ai;
 	ASSETS: Fetcher;
 	APP_MODE: "fixture";
-	MODEL_CONFIG_VERSION: "workers-ai-json-council-v14-bounded-semantic-proof";
+	MODEL_CONFIG_VERSION: "workers-ai-json-council-v15-bounded-quote-identity";
 	PIPELINE_VERSION: "0f7f47a4116e02d59f2622824e4535cda5c92ffa2eb0648deda04bd72309bed5";
 	CONSULTATION_LIMIT_PER_HOUR: "6";
 	SESSION_KEY_VERSION: "k1";

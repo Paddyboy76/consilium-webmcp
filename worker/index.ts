@@ -186,15 +186,16 @@ async function route(request:Request,env:Bindings,session:string):Promise<Respon
   }
   if(url.pathname==='/api/actions/commit'&&request.method==='POST'){
     const body=await boundedBody(request),proposalId=body.proposalId??body.proposal_id;if(typeof proposalId!=='string'||!/^proposal-[0-9a-f-]{36}$/.test(proposalId))return json({error:'INVALID_PROPOSAL_ID'},400);
-    const proposal=await env.DB.prepare("SELECT p.text,p.target_mission_id,m.area_id FROM proposals p LEFT JOIN missions m ON m.id=p.target_mission_id WHERE p.id=? AND p.session_id=? AND p.status='pending'").bind(proposalId,session).first<{text:string;target_mission_id:string|null;area_id:string|null}>();if(!proposal)return json({error:'ALREADY_COMMITTED_OR_NOT_OWNED',proposalId},409);
-    await seedProduct(env.DB,session);const actionId=`action-${crypto.randomUUID()}`,auditId=crypto.randomUUID(),missionId=proposal.target_mission_id;if(!missionId||!proposal.area_id)return json({error:'COMMIT_TARGET_INVARIANT_FAILED'},409);
+    const proposal=await env.DB.prepare("SELECT p.text,p.target_mission_id,m.area_id,m.title target_title FROM proposals p LEFT JOIN missions m ON m.id=p.target_mission_id WHERE p.id=? AND p.session_id=? AND p.status='pending'").bind(proposalId,session).first<{text:string;target_mission_id:string|null;area_id:string|null;target_title:string|null}>();if(!proposal)return json({error:'ALREADY_COMMITTED_OR_NOT_OWNED',proposalId},409);
+    await seedProduct(env.DB,session);const actionId=`action-${crypto.randomUUID()}`,auditId=crypto.randomUUID(),missionId=`goal-${proposalId.slice('proposal-'.length)}`,targetMissionId=proposal.target_mission_id;if(!targetMissionId||!proposal.area_id||!proposal.target_title)return json({error:'COMMIT_TARGET_INVARIANT_FAILED'},409);
     const results=await env.DB.batch([
       env.DB.prepare("UPDATE proposals SET status='committed',committed_at=datetime('now') WHERE id=? AND session_id=? AND status='pending'").bind(proposalId,session),
+      env.DB.prepare("INSERT OR IGNORE INTO missions(id,session_id,area_id,kind,title,why_text,horizon,status,progress,target_date,created_at) VALUES(?,?,?,'goal',?,?,'today','active',0,NULL,datetime('now'))").bind(missionId,session,proposal.area_id,proposal.text,`Approved action for ${proposal.target_title}`),
       env.DB.prepare("INSERT OR IGNORE INTO actions(id,user_id,proposal_id,text,status,created_at,mission_id) VALUES(?,'demo-user',?,?,'committed',datetime('now'),?)").bind(actionId,proposalId,proposal.text,missionId),
       env.DB.prepare("INSERT OR IGNORE INTO audit_events(id,session_id,event_type,subject_id,safe_detail_json,commit_proposal_id,created_at) VALUES(?,?,'action_committed',?,'{}',?,datetime('now'))").bind(auditId,session,actionId,proposalId),
     ]);
     if((results[0]?.meta.changes??0)!==1)return json({error:'ALREADY_COMMITTED_OR_NOT_OWNED',proposalId},409);
-    const output={actionId,proposalId,missionId,status:'committed',visibleIn:['today','missions','morning_brief','audit']};await auditTool(env.DB,session,'commit_proposed_action',{proposalId},output);return json(output);
+    const output={actionId,proposalId,missionId,targetMissionId,status:'committed',visibleIn:['today','missions','morning_brief','audit']};await auditTool(env.DB,session,'commit_proposed_action',{proposalId},output);return json(output);
   }
   return env.ASSETS.fetch(request);
 }
