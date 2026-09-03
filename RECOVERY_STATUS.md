@@ -1,6 +1,14 @@
-# Recovery status — Pass 15 Cloudflare-hosted OpenAI structured council
+# Recovery status — 3 September rehearsal repair
 
-Updated: 2026-09-02 UTC
+Updated: 2026-09-03 UTC
+
+## Rehearsal repair status
+
+- Safely fast-forwarded clean `main` from `404b904` to upstream documentation-only `e33c509`, then implemented the repair as `e0fb400`. Full evidence and the supervisor rehearsal boundary are in `docs/REHEARSAL_REPAIR_2026-09-03.md`.
+- The Workers AI request shape matches current official Cloudflare documentation and generated binding types. The old trace proves a non-JSON `response`, but lacked usage/length/termination metadata, so truncation versus malformed generation is not retroactively knowable. V14 adds bounded structural diagnostics and bounded output fields without changing the 1,600-token or 15-second budgets.
+- WebMCP and human Council now share one visible, reload-hydrated path; proposal target/duplicate/atomic approval defects, unsupported reflection citation, and frozen demo-clock disclosure are repaired.
+- Final focused verification: 45/45 tests, TypeScript/ESLint pass, production dry-run pass, and isolated Chromium/WebMCP rehearsal pass with one Council POST and no replay rendering.
+- New model attempts: 0/3. Deployment and live generation proof are blocked because Debian Wrangler OAuth is expired and refresh hit a Cloudflare bot challenge. No login was restarted. Do not label generation ready until a deployed v14 fictional diagnostic returns `workers-ai-structured` with valid provider diagnostics and semantic quote proof.
 
 ## Pass 15 result
 
