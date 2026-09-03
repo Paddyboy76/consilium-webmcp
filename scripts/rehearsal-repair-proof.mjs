@@ -1,0 +1,40 @@
+import {chromium} from 'playwright';
+
+const base=process.env.CONSILIUM_ACCEPTANCE_URL;
+if(!base)throw new Error('CONSILIUM_ACCEPTANCE_URL is required');
+const browser=await chromium.launch({headless:true});
+const context=await browser.newContext({viewport:{width:1440,height:900}});
+await context.addInitScript(()=>{
+  window.__consiliumTools={};
+  Object.defineProperty(document,'modelContext',{configurable:true,value:{registerTool:async(def,options={})=>{
+    window.__consiliumTools[def.name]=def;
+    options.signal?.addEventListener('abort',()=>delete window.__consiliumTools[def.name],{once:true});
+  }}});
+});
+const page=await context.newPage(),errors=[];
+page.on('console',message=>{if(message.type()==='error'&&!message.text().includes('status of 409'))errors.push(message.text())});
+page.on('pageerror',error=>errors.push(error.message));
+let councilPosts=0;page.on('request',request=>{if(request.method()==='POST'&&new URL(request.url()).pathname==='/api/council')councilPosts++});
+await page.goto(`${base}/#council`,{waitUntil:'networkidle'});
+await page.waitForFunction(()=>Boolean(window.__consiliumTools.consult_council));
+const question='Fictional rehearsal: Mum needs family support with the house sale while work is crowded. What can this council responsibly suggest?';
+const result=await page.evaluate(async question=>JSON.parse(await window.__consiliumTools.consult_council.execute({question})),question);
+await page.waitForFunction(question=>document.querySelector('#council-result')?.textContent?.includes(question),question);
+let visible=await page.locator('#council-result').innerText();
+for(const phrase of [question,'WHAT I REMEMBER','WHAT I CANNOT KNOW','WHERE THEY DIFFER','EVIDENCE AND TRACE','staged only, no action write'])if(!visible.includes(phrase))throw new Error(`render missing: ${phrase}`);
+if(councilPosts!==1)throw new Error(`consult rendered with ${councilPosts} model-path POSTs`);
+await page.reload({waitUntil:'networkidle'});
+await page.waitForFunction(question=>document.querySelector('#council-result')?.textContent?.includes(question),question);
+visible=await page.locator('#council-result').innerText();
+if(!visible.includes(result.traceId)||councilPosts!==1)throw new Error('persisted consultation did not hydrate without replay');
+const staged=await page.evaluate(async()=>JSON.parse(await window.__consiliumTools.propose_next_action.execute({text:'Ask my brother to take the solicitor paperwork for Mum’s house sale.',rationale:'Fictional isolated approval-contract rehearsal.'})));
+await page.waitForFunction(()=>Boolean(window.__consiliumTools.commit_proposed_action));
+const before=await page.evaluate(()=>fetch('/api/context').then(response=>response.json()));
+if(before.actions.length!==0||before.pending_proposal?.target_area_code!=='SOC')throw new Error('proposal was not staged against the social goal');
+const committed=await page.evaluate(async id=>JSON.parse(await window.__consiliumTools.commit_proposed_action.execute({proposal_id:id})),staged.proposalId);
+await page.waitForFunction(()=>!window.__consiliumTools.commit_proposed_action);
+const replay=await page.evaluate(id=>fetch('/api/actions/commit',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({proposal_id:id})}).then(response=>response.status),staged.proposalId);
+const after=await page.evaluate(()=>Promise.all([fetch('/api/context').then(response=>response.json()),fetch('/api/product').then(response=>response.json())]));
+await browser.close();
+if(errors.length||replay!==409||after[0].actions.length!==1||after[1].missions.length!==12||committed.missionId!==before.pending_proposal.target_mission_id)throw new Error(JSON.stringify({errors,replay,actions:after[0].actions.length,missions:after[1].missions.length,committed}));
+console.log(JSON.stringify({runtime:'local-fixture',questionFidelity:true,councilPosts,traceId:result.traceId,reloadedWithoutReplay:true,reports:result.reports.length,modelMode:result.modelMode,targetArea:before.pending_proposal.target_area_code,stagedWithoutAction:true,commitCapabilityRemoved:true,replayStatus:replay,actions:after[0].actions.length,missions:after[1].missions.length}));
