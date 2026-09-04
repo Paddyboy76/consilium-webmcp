@@ -1,8 +1,10 @@
 # Consilium — WebMCP Recovery Edition
 
-Consilium is a personal operating system in which lived history changes today’s plan. This Challenge Edition selectively adapts the pre-existing Brain2/Consilium interaction architecture to one Cloudflare Worker: four life areas, cross-horizon missions, progress and outcomes, CAAR evening reflection, a history-grounded morning brief, an appointed council, dual-grounded source traces, and proposal-before-commit control.
+Consilium is a personal operating system in which lived history changes today’s plan. This Challenge Edition adapts the pre-existing Brain2/Consilium interaction architecture to one Cloudflare Worker: six life areas (physical, mental, spiritual, social, financial and vocational), cross-horizon missions, progress and outcomes, full six-question evening reflection and per-goal review, a history-grounded morning brief, an appointed council, inspectable sources, and proposal-before-commit control.
 
-The persona and personal history are clearly synthetic. D1 is canonical state; Vectorize retrieves candidates; Workers AI supplies BGE embeddings in production. Council wording is currently an explicitly labelled deterministic, evidence-bounded synthesis—not a hidden or falsely claimed LLM call.
+The persona and personal history are clearly synthetic. D1 is canonical state; Vectorize retrieves candidates; Workers AI supplies BGE embeddings and attempts one bounded structured council response in production. Invalid output fails closed to a visibly labelled deterministic fallback. The actual run mode and evidence are inspectable; deployed configuration alone does not prove successful generation. Reflection synthesis and morning briefs are deterministic transformations of canonical records. Citations establish provenance, not a guarantee that advice is true.
+
+WebMCP exposes twelve normally available tools and a thirteenth one-use commit tool while a proposal is pending. The same interface and records serve human and agent interactions. [SUBMISSION.md](SUBMISSION.md) provides current submission copy; [DEMO.md](DEMO.md) contains the recording script and proof boundaries.
 
 ## Golden journey
 
